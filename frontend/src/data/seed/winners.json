@@ -1,0 +1,50 @@
+[
+  {
+    "id": "win_001",
+    "userId": "usr_carlos",
+    "giveawayId": "gw_2023_mustang",
+    "name": "Carlos M.",
+    "location": "El Paso, TX",
+    "country": "US",
+    "flag": "🇺🇸",
+    "car": "Mustang GT 5.0",
+    "carImage": "/images/winners/winner-mustang.png",
+    "badgeText": "Grand Prize Winner",
+    "totalEntries": 8750,
+    "wonAt": "2024-01-05T20:00:00.000Z",
+    "createdAt": "2024-01-05T20:00:00.000Z",
+    "updatedAt": "2024-01-05T20:00:00.000Z"
+  },
+  {
+    "id": "win_002",
+    "userId": "usr_ana",
+    "giveawayId": "gw_2023_supra",
+    "name": "Ana R.",
+    "location": "Cd. Juárez",
+    "country": "MX",
+    "flag": "🇲🇽",
+    "car": "Toyota Supra MK5",
+    "carImage": "/images/winners/winner-supra.png",
+    "badgeText": "Previous Winner",
+    "totalEntries": 9200,
+    "wonAt": "2023-07-05T18:00:00.000Z",
+    "createdAt": "2023-07-05T18:00:00.000Z",
+    "updatedAt": "2023-07-05T18:00:00.000Z"
+  },
+  {
+    "id": "win_003",
+    "userId": "usr_luis",
+    "giveawayId": "gw_2023_mustang",
+    "name": "Luis G.",
+    "location": "El Paso, TX",
+    "country": "US",
+    "flag": "🇺🇸",
+    "car": "Nissan GTR",
+    "carImage": "/images/winners/winner-gtr.png",
+    "badgeText": "Previous Winner",
+    "totalEntries": 6500,
+    "wonAt": "2023-03-15T19:00:00.000Z",
+    "createdAt": "2023-03-15T19:00:00.000Z",
+    "updatedAt": "2023-03-15T19:00:00.000Z"
+  }
+]

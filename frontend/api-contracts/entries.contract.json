@@ -1,0 +1,129 @@
+{
+  "domain": "Entries",
+  "description": "Entry calculation logic and admin reporting. Entries are the core gamification mechanic.",
+  "baseUrl": "/api/entries",
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/entries/calculate",
+      "description": "Calculate entries for a given price and optional multiplier. Used by the frontend to display entry counts on product cards.",
+      "queryParams": {
+        "price": { "type": "number", "required": true },
+        "productMultiplier": { "type": "number", "optional": true, "description": "If null/omitted, uses the global multiplier from config." }
+      },
+      "response": {
+        "type": "object",
+        "example": {
+          "entries": 350,
+          "multiplierUsed": 10,
+          "price": 35.00
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/entries/report",
+      "description": "Generate the full entry report for admin. Supports filtering by user, date range.",
+      "auth": "Required (admin role)",
+      "queryParams": {
+        "userId": { "type": "string", "optional": true },
+        "dateFrom": { "type": "string (ISO 8601)", "optional": true },
+        "dateTo": { "type": "string (ISO 8601)", "optional": true }
+      },
+      "response": {
+        "type": "array",
+        "itemSchema": {
+          "orderId": "string",
+          "userId": "string",
+          "userEmail": "string",
+          "userName": "string",
+          "entriesEarned": "number",
+          "multiplierUsed": "number",
+          "orderTotal": "number",
+          "orderStatus": "string",
+          "timestamp": "string (ISO 8601)",
+          "verificationHash": "string (cryptographic hash for audit)"
+        },
+        "example": {
+          "orderId": "ord_001",
+          "userId": "usr_carlos",
+          "userEmail": "carlos.m@test.com",
+          "userName": "Carlos M.",
+          "entriesEarned": 1450,
+          "multiplierUsed": 10,
+          "orderTotal": 145.00,
+          "orderStatus": "completed",
+          "timestamp": "2024-03-15T14:30:00.000Z",
+          "verificationHash": "b3JkXzAwMTp1c3I"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/entries/summary",
+      "description": "Get aggregated entry summary per user (admin dashboard).",
+      "auth": "Required (admin role)",
+      "response": {
+        "type": "array",
+        "itemSchema": {
+          "userId": "string",
+          "email": "string",
+          "name": "string",
+          "location": "string",
+          "totalEntries": "number",
+          "totalSpent": "number",
+          "orderCount": "number",
+          "lastOrderDate": "string (ISO 8601) | null"
+        },
+        "example": {
+          "userId": "usr_carlos",
+          "email": "carlos.m@test.com",
+          "name": "Carlos M.",
+          "location": "El Paso, TX",
+          "totalEntries": 8750,
+          "totalSpent": 875.00,
+          "orderCount": 3,
+          "lastOrderDate": "2024-03-15T14:30:00.000Z"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/entries/export",
+      "description": "Export entry report as CSV file download.",
+      "auth": "Required (admin role)",
+      "queryParams": {
+        "type": { "type": "string", "required": true, "enum": ["entries", "users"], "description": "'entries' = detailed report, 'users' = user summary" },
+        "userId": { "type": "string", "optional": true },
+        "dateFrom": { "type": "string", "optional": true },
+        "dateTo": { "type": "string", "optional": true }
+      },
+      "response": {
+        "type": "file",
+        "contentType": "text/csv",
+        "description": "CSV file download with headers matching the report/summary schemas."
+      }
+    }
+  ],
+  "calculationFormula": {
+    "description": "Core entry calculation logic",
+    "formula": "entries = floor(price × multiplier) × quantity",
+    "rules": [
+      "If a product has its own entryMultiplier (not null), use that instead of the global one.",
+      "Global multiplier is fetched from config.defaultEntryMultiplier.",
+      "Entries are always rounded DOWN (floor).",
+      "Cart total entries = sum of (entries × quantity) for each item."
+    ],
+    "examples": [
+      { "price": 35.00, "multiplier": 10, "quantity": 1, "entries": 350 },
+      { "price": 65.00, "multiplier": 10, "quantity": 2, "entries": 1300 },
+      { "price": 100.00, "multiplier": 15, "quantity": 1, "entries": 1500, "note": "Mystery Box uses product-level multiplier of 15" }
+    ]
+  },
+  "businessRules": [
+    "CRITICAL: Entry calculation MUST happen server-side. Never trust client calculations.",
+    "The verificationHash in reports should be a cryptographic hash (HMAC-SHA256 recommended) for audit trails.",
+    "The demo uses base64 encoding as a placeholder — the real backend must use proper cryptography.",
+    "Admin reports support CSV export for sweepstakes compliance and auditing."
+  ]
+}

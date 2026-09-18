@@ -1,0 +1,105 @@
+{
+  "domain": "Authentication",
+  "description": "User authentication: login, register, session management.",
+  "baseUrl": "/api/auth",
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "description": "Authenticate a user with email and password.",
+      "requestBody": {
+        "email": "string (required)",
+        "password": "string (required)"
+      },
+      "response": {
+        "success": {
+          "type": "object",
+          "schema": {
+            "id": "string (usr_XXX)",
+            "email": "string",
+            "name": "string",
+            "role": "string ('user' | 'admin')",
+            "is_vip": "boolean",
+            "avatar": "string | null",
+            "entries": "number",
+            "totalSpent": "number",
+            "location": "string",
+            "token": "string (JWT or session token)"
+          },
+          "example": {
+            "id": "usr_demo",
+            "email": "demo@borderbuilt.com",
+            "name": "Demo User",
+            "role": "user",
+            "is_vip": true,
+            "avatar": null,
+            "entries": 3500,
+            "totalSpent": 350.00,
+            "location": "El Paso, TX",
+            "token": "eyJhbGciOiJIUzI1NiIs..."
+          }
+        },
+        "error": {
+          "status": 401,
+          "example": { "error": "Invalid email or password" }
+        }
+      },
+      "notes": "The demo currently stores passwords in plaintext in users.json. Backend MUST hash passwords (bcrypt). Never return the password field in responses."
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/register",
+      "description": "Register a new user account.",
+      "requestBody": {
+        "name": "string (required)",
+        "email": "string (required, unique)",
+        "password": "string (required, min 6 chars)"
+      },
+      "response": {
+        "success": {
+          "type": "object",
+          "description": "Same as login response (auto-login after register)."
+        },
+        "error": {
+          "status": 409,
+          "example": { "error": "Email already exists" }
+        }
+      },
+      "notes": "New users start with 0 entries, 0 totalSpent, role 'user'."
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/logout",
+      "description": "Invalidate the current session/token.",
+      "auth": "Required",
+      "response": {
+        "example": { "success": true }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me",
+      "description": "Get the current authenticated user's profile (refreshed from DB).",
+      "auth": "Required",
+      "response": {
+        "type": "object",
+        "description": "Same user object as login (without password), with fresh entries/totalSpent."
+      },
+      "notes": "The frontend calls this to refresh the user session data. Must return the latest entries count and totalSpent."
+    }
+  ],
+  "businessRules": [
+    "Passwords MUST be hashed (bcrypt or argon2) — the demo stores them in plaintext for simplicity.",
+    "Never return the password field in any response.",
+    "The 'role' field determines access: 'admin' can access /admin routes, 'user' cannot.",
+    "Admin accounts should only be created via direct DB access, not through the register endpoint.",
+    "Session/token management is left to the backend implementation (JWT recommended)."
+  ],
+  "demoAccounts": [
+    { "email": "admin@borderbuilt.com", "password": "admin123", "role": "admin" },
+    { "email": "demo@borderbuilt.com", "password": "demo123", "role": "user" },
+    { "email": "carlos.m@test.com", "password": "test123", "role": "user" },
+    { "email": "ana.r@test.com", "password": "test123", "role": "user" },
+    { "email": "luis.g@test.com", "password": "test123", "role": "user" }
+  ]
+}

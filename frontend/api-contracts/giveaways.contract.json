@@ -1,0 +1,102 @@
+{
+  "domain": "Giveaways",
+  "description": "Active and past giveaways/sweepstakes with car specs and entry tracking.",
+  "baseUrl": "/api/giveaways",
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/giveaways",
+      "description": "List all giveaways. Optionally filter by status.",
+      "queryParams": {
+        "status": { "type": "string", "optional": true, "enum": ["active", "completed", "upcoming"] }
+      },
+      "response": {
+        "type": "array",
+        "itemSchema": {
+          "id": "string (gw_XXXX)",
+          "status": "string ('active' | 'completed' | 'upcoming')",
+          "title": "string",
+          "car": {
+            "make": "string",
+            "model": "string",
+            "year": "number",
+            "engine": "string",
+            "horsepower": "string",
+            "transmission": "string",
+            "mods": ["string"],
+            "color": "string",
+            "location": "string"
+          },
+          "cashPrize": "number (USD)",
+          "heroImage": "string (URL path)",
+          "endDate": "string (ISO 8601)",
+          "totalEntriesSold": "number",
+          "maxEntries": "number",
+          "entryMultiplier": "number",
+          "winnerId": "string | undefined (only on completed giveaways)",
+          "reqId": "string (internal tracking, optional)",
+          "createdAt": "string (ISO 8601)",
+          "updatedAt": "string (ISO 8601)"
+        },
+        "example": {
+          "id": "gw_2024_r34",
+          "status": "active",
+          "title": "Win This 350Z (Tokyo Drift) + $10,000 Cash",
+          "car": {
+            "make": "Nissan",
+            "model": "350Z (Tokyo Drift)",
+            "year": 2003,
+            "engine": "VQ35DE Twin-Turbo",
+            "horsepower": "460 WHP @ 12 PSI",
+            "transmission": "6-Speed Manual",
+            "mods": ["VeilSide Widebody Kit", "APEXi Twin-Turbo Kit", "Nismo Titanium Exhaust"],
+            "color": "VeilSide Charcoal & Black",
+            "location": "El Paso / Juárez"
+          },
+          "cashPrize": 10000,
+          "heroImage": "/images/nissan-350z-tokyo-garage.png",
+          "endDate": "2026-12-31T23:59:59.000Z",
+          "totalEntriesSold": 45230,
+          "maxEntries": 100000,
+          "entryMultiplier": 10,
+          "createdAt": "2024-01-01T00:00:00.000Z",
+          "updatedAt": "2024-06-10T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/giveaways/active",
+      "description": "Get the currently active giveaway. There should only be one active at a time.",
+      "response": {
+        "type": "object",
+        "description": "Single giveaway object with status 'active'."
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/giveaways/:id",
+      "description": "Get a single giveaway by ID.",
+      "response": {
+        "type": "object"
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/giveaways/:id",
+      "description": "Update a giveaway (admin only). Used to update totalEntriesSold, status, etc.",
+      "auth": "Required (admin role)",
+      "requestBody": {
+        "description": "Partial update object."
+      }
+    }
+  ],
+  "businessRules": [
+    "Only ONE giveaway should have status 'active' at any time.",
+    "totalEntriesSold should be incremented when orders are completed.",
+    "The endDate is used by the frontend countdown timer.",
+    "The car object contains specs displayed on the hero section and detail views.",
+    "When a giveaway ends, set status to 'completed' and assign winnerId.",
+    "maxEntries is used to calculate the progress bar percentage."
+  ]
+}

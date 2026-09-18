@@ -1,0 +1,1 @@
+<?php require 'vendor/autoload.php';  = new mysqli('localhost', 'noodluis_DEV_BB', 'mW!B6gW&n2=k', 'noodluis_border_built');  = ->query('SELECT breakdown_blocks FROM giveaways WHERE id=2'); while( = ->fetch_assoc()) { print_r(); } ?>

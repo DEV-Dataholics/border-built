@@ -1,0 +1,77 @@
+[
+  {
+    "id": "gw_2024_r34",
+    "status": "active",
+    "title": "Win This 350Z (Tokyo Drift) + $10,000 Cash",
+    "car": {
+      "make": "Nissan",
+      "model": "350Z (Tokyo Drift)",
+      "year": 2003,
+      "engine": "VQ35DE Twin-Turbo",
+      "horsepower": "460 WHP @ 12 PSI",
+      "transmission": "6-Speed Manual",
+      "mods": ["VeilSide Widebody Kit", "APEXi Twin-Turbo Kit", "Nismo Titanium Exhaust", "Tein Adjustable Coilovers", "Work Equip 3-Piece Wheels"],
+      "color": "VeilSide Charcoal & Black",
+      "location": "El Paso / Juárez"
+    },
+    "cashPrize": 10000,
+    "heroImage": "/images/nissan-350z-tokyo-garage.png",
+    "endDate": "2026-12-31T23:59:59.000Z",
+    "totalEntriesSold": 45230,
+    "maxEntries": 100000,
+    "entryMultiplier": 10,
+    "reqId": "#88392-X",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-06-10T00:00:00.000Z"
+  },
+  {
+    "id": "gw_2023_mustang",
+    "status": "completed",
+    "title": "Win This Mustang GT",
+    "car": {
+      "make": "Ford",
+      "model": "Mustang GT 5.0",
+      "year": 2020,
+      "engine": "5.0L Coyote V8",
+      "horsepower": "500 WHP",
+      "transmission": "6-Speed Manual",
+      "mods": ["Borla Exhaust", "Ford Performance Supercharger", "Brembo Brakes"],
+      "color": "Shadow Black",
+      "location": "El Paso, TX"
+    },
+    "cashPrize": 5000,
+    "heroImage": "",
+    "endDate": "2023-12-31T23:59:59.000Z",
+    "totalEntriesSold": 87500,
+    "maxEntries": 100000,
+    "entryMultiplier": 10,
+    "winnerId": "usr_carlos",
+    "createdAt": "2023-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-05T00:00:00.000Z"
+  },
+  {
+    "id": "gw_2023_supra",
+    "status": "completed",
+    "title": "Win This Supra MK5",
+    "car": {
+      "make": "Toyota",
+      "model": "Supra MK5 A90",
+      "year": 2021,
+      "engine": "B58 3.0L I6 Turbo",
+      "horsepower": "420 WHP",
+      "transmission": "8-Speed Auto (ZF)",
+      "mods": ["Downpipe", "Intake", "Stage 2 Tune"],
+      "color": "Renaissance Red",
+      "location": "Cd. Juárez, MX"
+    },
+    "cashPrize": 5000,
+    "heroImage": "",
+    "endDate": "2023-06-30T23:59:59.000Z",
+    "totalEntriesSold": 92000,
+    "maxEntries": 100000,
+    "entryMultiplier": 10,
+    "winnerId": "usr_ana",
+    "createdAt": "2023-01-01T00:00:00.000Z",
+    "updatedAt": "2023-07-05T00:00:00.000Z"
+  }
+]

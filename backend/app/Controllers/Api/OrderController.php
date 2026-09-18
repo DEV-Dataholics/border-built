@@ -1,0 +1,312 @@
+<?php
+
+namespace App\Controllers\Api;
+
+use CodeIgniter\RESTful\ResourceController;
+use App\Models\OrderModel;
+use App\Models\UserModel;
+use App\Models\ProductModel;
+use App\Models\CouponModel;
+use App\Models\CouponUsageModel;
+use App\Models\OrderItemModel;
+
+class OrderController extends ResourceController
+{
+    public function options()
+    {
+        return $this->response->setStatusCode(200);
+    }
+
+    public function create()
+    {
+        $orderModel = new OrderModel();
+        $userModel = new UserModel();
+        $productModel = new ProductModel();
+        $couponModel = new CouponModel();
+        $couponUsageModel = new CouponUsageModel();
+        $orderItemModel = new OrderItemModel();
+
+        $data = $this->request->getJSON(true);
+
+        if (!$data) {
+            return $this->fail('Invalid JSON');
+        }
+
+        $userId = $data['userId'] ?? 'guest';
+        $orderId = 'ord_' . uniqid();
+
+        $subtotal = (float)($data['subtotal'] ?? 0);
+        $shipping = (float)($data['shipping'] ?? 0);
+        $couponCode = !empty($data['couponCode']) ? strtoupper(trim($data['couponCode'])) : null;
+        $discountAmount = 0.00;
+        $appliedCoupon = null;
+
+        // Validar y recalcular cupón en servidor
+        if ($couponCode) {
+            $coupon = $couponModel->findByCode($couponCode);
+            if ($coupon && (int)$coupon['is_active'] === 1) {
+                $now = date('Y-m-d H:i:s');
+                $isDateValid = (empty($coupon['start_date']) || $coupon['start_date'] <= $now) &&
+                               (empty($coupon['expires_at']) || $coupon['expires_at'] >= $now);
+                $isLimitValid = ($coupon['usage_limit'] === null || (int)$coupon['usage_count'] < (int)$coupon['usage_limit']);
+                $isMinValid = ($subtotal >= (float)($coupon['min_purchase'] ?? 0));
+
+                if ($isDateValid && $isLimitValid && $isMinValid) {
+                    $val = (float)$coupon['value'];
+                    if ($coupon['reward_type'] === 'discount') {
+                        if (($coupon['discount_type'] ?? 'percentage') === 'percentage') {
+                            $discountAmount = $subtotal * ($val / 100.0);
+                            if (!empty($coupon['max_discount']) && (float)$coupon['max_discount'] > 0) {
+                                $discountAmount = min($discountAmount, (float)$coupon['max_discount']);
+                            }
+                        } else {
+                            $discountAmount = min($subtotal, $val);
+                        }
+                    }
+                    $discountAmount = round($discountAmount, 2);
+                    $appliedCoupon = $coupon;
+                }
+            }
+        }
+
+        $finalTotal = max(0, round($subtotal - $discountAmount + $shipping, 2));
+
+        // Deducción de Stock (Standard & Mystery Box bundle items)
+        if (isset($data['items']) && is_array($data['items'])) {
+            foreach ($data['items'] as $item) {
+                if (isset($item['productId']) && isset($item['quantity'])) {
+                    $itemQty = (int) $item['quantity'];
+                    $product = $productModel->find($item['productId']);
+
+                    // Deduct stock for main product
+                    if ($product && isset($product['stock'])) {
+                        $newStock = max(0, (int)$product['stock'] - $itemQty);
+                        $productModel->update($product['id'], ['stock' => $newStock]);
+                    }
+
+                    // Deduct stock for bundled items inside Mystery Box
+                    $bundleItems = $item['bundleItems'] ?? [];
+                    if (!empty($bundleItems) && is_array($bundleItems)) {
+                        foreach ($bundleItems as $bundle) {
+                            $bundledProdId = $bundle['productId'] ?? null;
+                            $bundledQty    = (int) ($bundle['quantity'] ?? 1);
+                            if ($bundledProdId) {
+                                $bundledProd = $productModel->find($bundledProdId);
+                                if ($bundledProd && isset($bundledProd['stock'])) {
+                                    $deductQty = $bundledQty * $itemQty;
+                                    $newBundledStock = max(0, (int)$bundledProd['stock'] - $deductQty);
+                                    $productModel->update($bundledProdId, ['stock' => $newBundledStock]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Crear PaymentIntent en Stripe via REST API
+        $stripePaymentIntentId = null;
+        $stripeClientSecret = null;
+        $stripeSecretKey = getenv('STRIPE_SECRET_KEY') ?: '';
+
+        $stripeError = null;
+        if (!empty($stripeSecretKey) && $finalTotal > 0) {
+            $stripeResult = $this->createStripePaymentIntent($stripeSecretKey, [
+                'amount' => (int)round($finalTotal * 100),
+                'currency' => getenv('STRIPE_CURRENCY') ?: 'usd',
+                'description' => 'Orden ' . $orderId . ' - BorderApp',
+                'metadata' => [
+                    'order_id' => $orderId,
+                    'user_id' => $userId,
+                    'coupon_code' => $couponCode ?? 'NONE',
+                    'discount_amount' => $discountAmount,
+                    'subtotal' => $subtotal,
+                    'shipping' => $shipping,
+                    'total' => $finalTotal,
+                ]
+            ]);
+
+            if (isset($stripeResult['error'])) {
+                $stripeError = $stripeResult['error'];
+            } elseif ($stripeResult && !empty($stripeResult['id'])) {
+                $stripePaymentIntentId = $stripeResult['id'];
+                $stripeClientSecret = $stripeResult['client_secret'] ?? null;
+            }
+        }
+
+        $orderData = [
+            'id'                       => $orderId,
+            'user_id'                  => $userId,
+            'subtotal'                 => $subtotal,
+            'shipping'                 => $shipping,
+            'coupon_code'              => $couponCode,
+            'discount'                 => $discountAmount,
+            'total'                    => $finalTotal,
+            'entries_earned'           => $data['entriesEarned'] ?? 0,
+            'multiplier_used'          => $data['multiplierUsed'] ?? 1,
+            'status'                   => ($finalTotal <= 0) ? 'completed' : ($data['status'] ?? 'completed'),
+            'shipping_address'         => $data['shippingAddress'] ?? '',
+            'stripe_payment_intent_id' => $stripePaymentIntentId,
+        ];
+
+        $orderModel->insert($orderData);
+
+        // Insert items into order_items
+        if (isset($data['items']) && is_array($data['items'])) {
+            foreach ($data['items'] as $item) {
+                $bundleItems = $item['bundleItems'] ?? null;
+                $orderItemModel->insert([
+                    'order_id'     => $orderId,
+                    'product_id'   => $item['productId'] ?? 0,
+                    'name'         => $item['name'] ?? '',
+                    'size'         => $item['size'] ?? null,
+                    'color'        => $item['color'] ?? null,
+                    'quantity'     => $item['quantity'] ?? 1,
+                    'price'        => $item['price'] ?? 0.00,
+                    'bundle_items' => !empty($bundleItems) ? json_encode($bundleItems) : null,
+                ]);
+            }
+        }
+
+        // Incrementar uso de cupón y guardar log de uso
+        if ($appliedCoupon) {
+            $couponModel->update($appliedCoupon['id'], [
+                'usage_count' => (int)$appliedCoupon['usage_count'] + 1
+            ]);
+
+            $couponUsageModel->insert([
+                'coupon_id' => $appliedCoupon['id'],
+                'order_id' => $orderId,
+                'user_id' => $userId,
+                'discount_amount' => $discountAmount,
+            ]);
+        }
+
+        // NOTE: We no longer increment users.entries / users.total_spent here.
+        // Entries and total_spent are computed dynamically from valid orders
+        // (status IN 'completed','shipped') in UserController::show().
+        // This prevents inflation from test orders, cancelled payments, etc.
+
+        // Send email receipt immediately if the order is free ($0 total)
+        if ($finalTotal <= 0) {
+            \App\Libraries\EmailHelper::sendOrderReceipt($orderId);
+        }
+
+        return $this->respondCreated([
+            'status' => 'success',
+            'orderId' => $orderId,
+            'couponCode' => $couponCode,
+            'discount' => $discountAmount,
+            'total' => $finalTotal,
+            'stripePaymentIntentId' => $stripePaymentIntentId,
+            'stripeClientSecret' => $stripeClientSecret,
+            'stripeError' => $stripeError
+        ]);
+    }
+
+    private function createStripePaymentIntent(string $secretKey, array $params)
+    {
+        if (!function_exists('curl_init')) {
+            return null;
+        }
+
+        $ch = curl_init('https://api.stripe.com/v1/payment_intents');
+        
+        $postFields = [
+            'amount' => $params['amount'],
+            'currency' => $params['currency'],
+            'description' => $params['description'],
+            'automatic_payment_methods[enabled]' => 'true',
+        ];
+
+        if (!empty($params['metadata']) && is_array($params['metadata'])) {
+            foreach ($params['metadata'] as $key => $val) {
+                $postFields["metadata[{$key}]"] = (string)$val;
+            }
+        }
+
+        curl_setopt($ch, \CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, \CURLOPT_POST, true);
+        curl_setopt($ch, \CURLOPT_POSTFIELDS, http_build_query($postFields));
+        curl_setopt($ch, \CURLOPT_USERPWD, $secretKey . ':');
+        curl_setopt($ch, \CURLOPT_TIMEOUT, 10);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode >= 200 && $httpCode < 300 && $response) {
+            return json_decode($response, true);
+        }
+
+        if ($response) {
+            $decoded = json_decode($response, true);
+            if (isset($decoded['error'])) {
+                return ['error' => $decoded['error']];
+            }
+            // Include raw response in message so we can see it in frontend
+            return ['error' => ['message' => 'Stripe HTTP ' . $httpCode . ' Raw: ' . strip_tags($response)]];
+        }
+
+        return ['error' => ['message' => 'Unknown cURL error to Stripe']];
+    }
+
+    public function userOrders($userId)
+    {
+        $orderModel = new OrderModel();
+        $orderItemModel = new OrderItemModel();
+
+        // Get orders for the user, ordered by newest first
+        $orders = $orderModel->where('user_id', $userId)
+                             ->orderBy('created_at', 'DESC')
+                             ->findAll();
+
+        foreach ($orders as &$order) {
+            $order['total'] = (float) $order['total'];
+            $order['entries_earned'] = (int) $order['entries_earned'];
+            $order['status'] = !empty($order['status']) ? $order['status'] : 'pending';
+            
+            // Attach items
+            $items = $orderItemModel->where('order_id', $order['id'])->findAll();
+            $order['items'] = $items;
+        }
+
+        return $this->respond($orders);
+    }
+    public function confirmStripePayment()
+    {
+        $json = $this->request->getJSON(true);
+        if (!$json || empty($json['paymentIntentId'])) {
+            return $this->failValidationErrors('Payment Intent ID required');
+        }
+
+        $paymentIntentId = $json['paymentIntentId'];
+        $stripeSecretKey = getenv('STRIPE_SECRET_KEY') ?: '';
+
+        $ch = curl_init('https://api.stripe.com/v1/payment_intents/' . $paymentIntentId);
+        curl_setopt($ch, \CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, \CURLOPT_USERPWD, $stripeSecretKey . ':');
+        curl_setopt($ch, \CURLOPT_TIMEOUT, 10);
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        if (!$response) {
+            return $this->fail('Failed to connect to Stripe');
+        }
+
+        $stripeData = json_decode($response, true);
+        if (isset($stripeData['status']) && $stripeData['status'] === 'succeeded') {
+            $orderModel = new OrderModel();
+            $order = $orderModel->where('stripe_payment_intent_id', $paymentIntentId)->first();
+
+            if ($order && $order['status'] === 'pending') {
+                $orderModel->update($order['id'], ['status' => 'completed']);
+                \App\Libraries\EmailHelper::sendOrderReceipt($order['id']);
+                return $this->respond(['status' => 'success', 'message' => 'Order completed']);
+            }
+            return $this->respond(['status' => 'already_processed']);
+        }
+
+        return $this->fail('Payment not successful in Stripe');
+    }
+}

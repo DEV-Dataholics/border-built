@@ -1,0 +1,429 @@
+openapi: 3.0.3
+info:
+  title: BorderApp Hybrid E-commerce API
+  description: API contract for the hybrid e-commerce platform combining physical products with digital entry assignments (giveaway tickets).
+  version: 1.1.0
+servers:
+  - url: http://localhost:5174/api
+    description: Local Dev Server
+paths:
+  /order:
+    post:
+      summary: Create a new order
+      description: Initializes a physical order, calculates subtotals, shipping costs, and estimates earned digital entries based on active multipliers.
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Unique key to guarantee idempotency and prevent duplicate orders.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+                - items
+                - shippingAddress
+              properties:
+                userId:
+                  type: string
+                  description: Unique identifier of the user placing the order.
+                  example: usr_carlos
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - productId
+                      - size
+                      - color
+                      - quantity
+                    properties:
+                      productId:
+                        type: string
+                        example: prod_001
+                      size:
+                        type: string
+                        example: L
+                      color:
+                        type: string
+                        example: Black/Neon
+                      quantity:
+                        type: integer
+                        minimum: 1
+                        example: 2
+                shippingAddress:
+                  type: string
+                  example: 123 Mesa St, El Paso, TX 79901
+      responses:
+        '201':
+          description: Order created successfully with pending_payment status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          description: Invalid request payload (e.g. out of stock, missing fields)
+
+  /checkout:
+    post:
+      summary: Initialize payment intent
+      description: Creates a Stripe PaymentIntent for the given order and returns the client_secret required by Stripe Elements on the frontend.
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Unique key to prevent duplicate payment intents.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - orderId
+              properties:
+                orderId:
+                  type: string
+                  description: ID of the pending order.
+                  example: ord_001
+      responses:
+        '200':
+          description: PaymentIntent created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - client_secret
+                  - orderId
+                properties:
+                  client_secret:
+                    type: string
+                    description: Stripe PaymentIntent client secret used by Stripe Elements.
+                    example: pi_3O..._secret_...
+                  orderId:
+                    type: string
+                    example: ord_001
+        '400':
+          description: Invalid order ID or Order already paid
+
+  /webhook/stripe:
+    post:
+      summary: Stripe Webhook Receiver
+      description: Endpoint to securely receive asynchronous events from Stripe (e.g., payment_intent.succeeded). This is where the order is marked as completed and entries are officially assigned.
+      parameters:
+        - in: header
+          name: Stripe-Signature
+          schema:
+            type: string
+          required: true
+          description: Stripe webhook signature to verify the payload origin and integrity.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Stripe Event Object (raw body for signature validation)
+      responses:
+        '200':
+          description: Webhook received and processed successfully
+        '400':
+          description: Webhook signature verification failed
+
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - id
+        - email
+        - name
+        - role
+        - entries
+        - totalSpent
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          example: usr_carlos
+        email:
+          type: string
+          format: email
+          example: carlos.m@test.com
+        name:
+          type: string
+          example: Carlos M.
+        role:
+          type: string
+          enum: [admin, user]
+          example: user
+        password:
+          type: string
+          description: Hashed or plaintext password (from static mock data)
+          example: test123
+        avatar:
+          type: string
+          nullable: true
+          example: null
+        entries:
+          type: integer
+          description: Accumulated digital entries (ticket count) for active giveaways.
+          example: 8750
+        totalSpent:
+          type: number
+          format: double
+          description: Cumulative spending across all completed orders.
+          example: 875.00
+        location:
+          type: string
+          example: El Paso, TX
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-03-15T00:00:00.000Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-06-01T00:00:00.000Z"
+
+    Product:
+      type: object
+      required:
+        - id
+        - name
+        - slug
+        - category
+        - description
+        - price
+        - variants
+        - images
+        - tags
+        - featured
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          example: prod_001
+        name:
+          type: string
+          example: BORDERBUILT Hoodie
+        slug:
+          type: string
+          example: border-spec-hoodie
+        category:
+          type: string
+          example: hoodies
+        description:
+          type: string
+          example: Premium heavyweight hoodie with neon BORDERBUILT logo. Represents the binational car culture of Juárez-El Paso.
+        price:
+          type: number
+          format: double
+          example: 65.00
+        compareAtPrice:
+          type: number
+          format: double
+          nullable: true
+          example: 78.00
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductVariant'
+        images:
+          type: array
+          items:
+            type: string
+          example: ["/images/products/hoodie-black-neon.png"]
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["BEST SELLER"]
+        entryMultiplier:
+          type: integer
+          nullable: true
+          description: Custom entry multiplier for this product. If null, standard default multiplier applies.
+          example: null
+        featured:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-01-15T00:00:00.000Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-06-01T00:00:00.000Z"
+
+    ProductVariant:
+      type: object
+      required:
+        - size
+        - color
+        - stock
+      properties:
+        size:
+          type: string
+          example: S
+        color:
+          type: string
+          example: Black/Neon
+        stock:
+          type: integer
+          example: 50
+
+    Order:
+      type: object
+      required:
+        - id
+        - userId
+        - items
+        - subtotal
+        - shipping
+        - total
+        - entriesEarned
+        - multiplierUsed
+        - status
+        - shippingAddress
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          example: ord_001
+        userId:
+          type: string
+          example: usr_carlos
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+        subtotal:
+          type: number
+          format: double
+          example: 145.00
+        shipping:
+          type: number
+          format: double
+          example: 0.00
+        total:
+          type: number
+          format: double
+          example: 145.00
+        entriesEarned:
+          type: integer
+          description: Total entries calculated and awarded for this order. Server-side calculated only.
+          example: 1450
+        multiplierUsed:
+          type: integer
+          description: The entry multiplier applied to the order calculations at the time of creation.
+          example: 10
+        status:
+          type: string
+          enum: [pending_payment, completed, refunded, cancelled]
+          description: Transactional state of the order.
+          example: pending_payment
+        shippingAddress:
+          type: string
+          example: 123 Mesa St, El Paso, TX 79901
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-03-15T14:30:00.000Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-03-18T10:00:00.000Z"
+
+    OrderItem:
+      type: object
+      required:
+        - productId
+        - name
+        - size
+        - color
+        - price
+        - quantity
+      properties:
+        productId:
+          type: string
+          example: prod_001
+        name:
+          type: string
+          example: BORDERBUILT Hoodie
+        size:
+          type: string
+          example: L
+        color:
+          type: string
+          example: Black/Neon
+        price:
+          type: number
+          format: double
+          example: 65.00
+        quantity:
+          type: integer
+          example: 2
+
+    Entry:
+      type: object
+      required:
+        - orderId
+        - userId
+        - userEmail
+        - userName
+        - entriesEarned
+        - multiplierUsed
+        - orderTotal
+        - orderStatus
+        - timestamp
+        - verificationHash
+      properties:
+        orderId:
+          type: string
+          example: ord_001
+        userId:
+          type: string
+          example: usr_carlos
+        userEmail:
+          type: string
+          format: email
+          example: carlos.m@test.com
+        userName:
+          type: string
+          example: Carlos M.
+        entriesEarned:
+          type: integer
+          description: Total number of tickets assigned from this transaction.
+          example: 1450
+        multiplierUsed:
+          type: integer
+          example: 10
+        orderTotal:
+          type: number
+          format: double
+          example: 145.00
+        orderStatus:
+          type: string
+          example: completed
+        timestamp:
+          type: string
+          format: date-time
+          example: "2024-03-15T14:30:00.000Z"
+        verificationHash:
+          type: string
+          description: A validation hash computed from order detail keys to prevent tampering.
+          example: b3JkXzAwMTp1c3Jf

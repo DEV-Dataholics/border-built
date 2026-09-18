@@ -1,0 +1,42 @@
+[
+  {
+    "id": "comm_001",
+    "title": "Reunión Fronteriza",
+    "location": "Cd. Juárez",
+    "emoji": "🇲🇽",
+    "image": "/images/winners/event-reunion.png",
+    "linkUrl": "https://instagram.com",
+    "createdAt": "2024-01-10T12:00:00.000Z",
+    "updatedAt": "2024-01-10T12:00:00.000Z"
+  },
+  {
+    "id": "comm_002",
+    "title": "Progreso del Build",
+    "location": "El Paso, TX",
+    "emoji": "🇺🇸",
+    "image": "/images/winners/event-build.png",
+    "linkUrl": "https://instagram.com",
+    "createdAt": "2024-01-15T12:00:00.000Z",
+    "updatedAt": "2024-01-15T12:00:00.000Z"
+  },
+  {
+    "id": "comm_003",
+    "title": "Noche de Drift",
+    "location": "El Paso, TX",
+    "emoji": "🇺🇸",
+    "image": "/images/winners/event-drift.png",
+    "linkUrl": "https://instagram.com",
+    "createdAt": "2024-01-20T12:00:00.000Z",
+    "updatedAt": "2024-01-20T12:00:00.000Z"
+  },
+  {
+    "id": "comm_004",
+    "title": "Cars & Coffee",
+    "location": "Cd. Juárez",
+    "emoji": "🇲🇽",
+    "image": "/images/winners/event-coffee.png",
+    "linkUrl": "https://instagram.com",
+    "createdAt": "2024-01-25T12:00:00.000Z",
+    "updatedAt": "2024-01-25T12:00:00.000Z"
+  }
+]

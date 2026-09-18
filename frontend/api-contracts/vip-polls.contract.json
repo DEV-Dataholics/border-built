@@ -1,0 +1,110 @@
+{
+  "domain": "VIP Lounge & Exclusive Polls",
+  "description": "VIP Lounge features and exclusive polling system for VIP members.",
+  "baseUrl": "/api/vip",
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/vip/polls",
+      "description": "Retrieve active VIP polls with options. Responses vary depending on whether the user has already voted.",
+      "headers": {
+        "X-User-Id": "string (required, ID of authenticated user)"
+      },
+      "queryParams": {
+        "user_id": "string (optional fallback for X-User-Id)"
+      },
+      "response": {
+        "success": {
+          "status": 200,
+          "example_not_voted": [
+            {
+              "id": 1,
+              "title": "¿Cuál debe ser el próximo auto a modificar en BORDERBUILT?",
+              "description": "Tu voto como usuario VIP define la próxima construcción de nuestro taller.",
+              "is_active": true,
+              "has_voted": false,
+              "user_voted_option_id": null,
+              "options": [
+                { "id": 101, "name": "Nissan Skyline R34 GT-T", "image_url": "/images/polls/skyline.jpg" },
+                { "id": 102, "name": "Toyota Supra Mk4 Twin Turbo", "image_url": "/images/polls/supra.jpg" },
+                { "id": 103, "name": "Ford Mustang Shelby GT500", "image_url": "/images/polls/gt500.jpg" }
+              ],
+              "created_at": "2026-07-21 12:00:00"
+            }
+          ],
+          "example_voted": [
+            {
+              "id": 1,
+              "title": "¿Cuál debe ser el próximo auto a modificar en BORDERBUILT?",
+              "description": "Tu voto como usuario VIP define la próxima construcción de nuestro taller.",
+              "is_active": true,
+              "has_voted": true,
+              "user_voted_option_id": 101,
+              "total_votes": 120,
+              "options": [
+                { "id": 101, "name": "Nissan Skyline R34 GT-T", "image_url": "/images/polls/skyline.jpg", "votes_count": 60, "percentage": 50.0 },
+                { "id": 102, "name": "Toyota Supra Mk4 Twin Turbo", "image_url": "/images/polls/supra.jpg", "votes_count": 42, "percentage": 35.0 },
+                { "id": 103, "name": "Ford Mustang Shelby GT500", "image_url": "/images/polls/gt500.jpg", "votes_count": 18, "percentage": 15.0 }
+              ],
+              "created_at": "2026-07-21 12:00:00"
+            }
+          ]
+        },
+        "forbidden": {
+          "status": 403,
+          "example": { "error": "Acceso exclusivo para miembros VIP." }
+        }
+      },
+      "notes": "Before voting, percentages and votes_count MUST be omitted to avoid influencing voting behavior via net sniffing."
+    },
+    {
+      "method": "POST",
+      "path": "/api/vip/polls/{id}/vote",
+      "description": "Cast a single immutable vote for a specific poll option.",
+      "requestBody": {
+        "user_id": "string (required)",
+        "option_id": "number (required)"
+      },
+      "response": {
+        "success": {
+          "status": 201,
+          "example": {
+            "message": "Voto registrado exitosamente.",
+            "poll_id": 1,
+            "user_voted_option_id": 101
+          }
+        },
+        "error_already_voted": {
+          "status": 403,
+          "example": { "error": "Ya has emitido tu voto para esta encuesta. El voto es inmutable." }
+        },
+        "error_not_vip": {
+          "status": 403,
+          "example": { "error": "Acceso denegado. Solo usuarios VIP pueden votar." }
+        }
+      },
+      "notes": "The database contains a UNIQUE constraint (poll_id, user_id) enforcing 1 vote per user per poll."
+    },
+    {
+      "method": "PUT",
+      "path": "/api/admin/users/{id}/vip",
+      "description": "Toggle or set the VIP status of a user (Admin only).",
+      "requestBody": {
+        "is_vip": "boolean (optional, if omitted toggles current status)"
+      },
+      "response": {
+        "status": 200,
+        "example": {
+          "message": "Estatus VIP actualizado correctamente.",
+          "id": "usr_demo",
+          "is_vip": true
+        }
+      }
+    }
+  ],
+  "businessRules": [
+    "VIP Access Gatekeeping: Access to VIP Lounge routes and voting endpoints is strictly limited to users with is_vip == true.",
+    "Single & Immutable Vote: 1 User = 1 Vote per poll enforced at DB level (UNIQUE index on poll_id, user_id). Votes cannot be edited or revoked.",
+    "Voting Progress Privacy: Voting percentage bars and counts are hidden until after the vote is cast."
+  ]
+}

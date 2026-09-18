@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+@theme {
+    --color-primary: #CCFF00; /* Bright Lime */
+    --color-primary-dim: #99CC00;
+    --color-accent: #D40000; /* Red Ferrari */
+    --color-blue: #3A4BFF; /* Electric Blue */
+    --color-background-light: #f6f8f5;
+    --color-background-dark: #111111; /* Tokyo Underground */
+    --color-card-dark: #2A2A2D; /* Gunmetal */
+    --color-border-dark: #3E3E42;
+    --color-surface-dark: #2A2A2D;
+    --color-carbon-dark: #050505;
+    --color-carbon-light: #1A1A1D;
+
+    --font-display: "Syncopate", sans-serif;
+    --font-brush: "Permanent Marker", cursive;
+    --font-primary: "Teko", sans-serif;
+    --font-body: "Space Grotesk", sans-serif;
+    --font-mono: "JetBrains Mono", monospace;
+
+    /* Extending shadows */
+    --shadow-neon: 0 0 10px rgba(204, 255, 0, 0.3), 0 0 20px rgba(204, 255, 0, 0.1);
+
+    /* Background patterns - slightly trickier in pure CSS theme vars but we can use classes */
+}
+
+/* Custom Utilities for backgrounds */
+@utility bg-carbon-pattern {
+    background-color: #111111;
+    background-image:
+        linear-gradient(45deg, #18181A 25%, transparent 25%, transparent 75%, #18181A 75%, #18181A),
+        linear-gradient(45deg, #18181A 25%, transparent 25%, transparent 75%, #18181A 75%, #18181A);
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
+}
+
+@utility bg-thermal-gradient {
+    background: linear-gradient(to bottom, #000000 0%, #0c20d6 35%, #00f5c0 55%, #ffb300 75%, #ff003c 100%);
+}
+
+@utility carbon-bg {
+    @apply bg-carbon-pattern;
+}
+
+/* Custom scrollbar hiding */
+@utility hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+/* Global scrollbar style */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #111111;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #3E3E42;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #CCFF00;
+}
+
+body {
+    min-height: max(884px, 100dvh);
+}
+
+/* Fix select options & autofill dark mode readability */
+select option {
+    background-color: #1a1a1a !important;
+    color: #ffffff !important;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+    -webkit-text-fill-color: #ffffff !important;
+    -webkit-box-shadow: 0 0 0px 1000px #1a1a1a inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+}

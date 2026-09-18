@@ -1,0 +1,12 @@
+{
+  "name": "border-spec-e2e",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "playwright test",
+    "test:post-deploy": "playwright test post_deploy_smoke.spec.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.0.0"
+  }
+}

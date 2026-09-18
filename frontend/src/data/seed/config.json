@@ -1,0 +1,32 @@
+{
+  "siteTitle": "BORDERBUILT",
+  "tagline": "Two Cities. One Passion.",
+  "taglineEs": "Dos Ciudades. Una Pasión.",
+  "defaultEntryMultiplier": 10,
+  "freeShippingThreshold": 100,
+  "fomoTexts": {
+    "en": {
+      "progressBar": "entries sold",
+      "urgency": "Limited Time Event",
+      "nearGoal": "You're close!",
+      "cartUpsell": "Add ${amount} more to unlock the VIP PACK!",
+      "marquee": ["⚡ 10X Entries Activated ⚡", "Free Shipping on orders +$100", "New Drops every Friday"]
+    },
+    "es": {
+      "progressBar": "entradas vendidas",
+      "urgency": "Evento por Tiempo Limitado",
+      "nearGoal": "¡Estás cerca!",
+      "cartUpsell": "¡Agrega ${amount} USD más para desbloquear el PACK VIP!",
+      "marquee": ["⚡ 10X Entradas Activadas ⚡", "Envío Gratis en órdenes +$100", "Nuevos Drops cada Viernes"]
+    }
+  },
+  "socialLinks": {
+    "instagram": "https://instagram.com/borderbuilt",
+    "tiktok": "https://tiktok.com/@borderbuilt",
+    "facebook": "https://facebook.com/borderbuilt"
+  },
+  "contactEmail": "info@borderbuilt.com",
+  "legalDisclaimer": "No Purchase Necessary. Must be 18+ to enter. See Official Rules for details.",
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "updatedAt": "2024-06-01T00:00:00.000Z"
+}

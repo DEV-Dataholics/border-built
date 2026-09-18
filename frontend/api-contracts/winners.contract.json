@@ -1,0 +1,71 @@
+{
+  "domain": "Winners",
+  "description": "Past giveaway winners display.",
+  "baseUrl": "/api/winners",
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/winners",
+      "description": "List all past winners.",
+      "response": {
+        "type": "array",
+        "itemSchema": {
+          "id": "string (win_XXX)",
+          "userId": "string",
+          "giveawayId": "string",
+          "name": "string",
+          "location": "string",
+          "country": "string ('US' | 'MX')",
+          "flag": "string (emoji flag)",
+          "car": "string (car name)",
+          "carImage": "string (URL path)",
+          "badgeText": "string ('Grand Prize Winner' | 'Previous Winner')",
+          "totalEntries": "number",
+          "wonAt": "string (ISO 8601)",
+          "createdAt": "string (ISO 8601)",
+          "updatedAt": "string (ISO 8601)"
+        },
+        "example": {
+          "id": "win_001",
+          "userId": "usr_carlos",
+          "giveawayId": "gw_2023_mustang",
+          "name": "Carlos M.",
+          "location": "El Paso, TX",
+          "country": "US",
+          "flag": "🇺🇸",
+          "car": "Mustang GT 5.0",
+          "carImage": "/images/winners/winner-mustang.png",
+          "badgeText": "Grand Prize Winner",
+          "totalEntries": 8750,
+          "wonAt": "2024-01-05T20:00:00.000Z",
+          "createdAt": "2024-01-05T20:00:00.000Z",
+          "updatedAt": "2024-01-05T20:00:00.000Z"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/winners",
+      "description": "Record a new winner (admin only). Typically done when a giveaway ends.",
+      "auth": "Required (admin role)",
+      "requestBody": {
+        "userId": "string (required)",
+        "giveawayId": "string (required)",
+        "name": "string (required)",
+        "location": "string (required)",
+        "country": "string (required, 'US' or 'MX')",
+        "flag": "string (emoji)",
+        "car": "string (required)",
+        "carImage": "string (URL path)",
+        "badgeText": "string",
+        "totalEntries": "number"
+      }
+    }
+  ],
+  "businessRules": [
+    "Winners are displayed on the public /winners page as social proof.",
+    "The flag emoji is used for binational display (🇺🇸 / 🇲🇽).",
+    "The badgeText distinguishes between 'Grand Prize Winner' and 'Previous Winner'.",
+    "Creating a winner should also update the corresponding giveaway's winnerId and status."
+  ]
+}

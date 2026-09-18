@@ -1,0 +1,87 @@
+{
+  "domain": "Coupons Management & Promotional Redemptions",
+  "version": "1.0.0",
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/coupons/validate?code={code}",
+      "description": "Validate discount coupon code at checkout or for entries redemption",
+      "request_params": {
+        "code": "string (required)"
+      },
+      "response_200": {
+        "valid": true,
+        "coupon": {
+          "id": 1,
+          "code": "BORDER2026",
+          "reward_type": "discount",
+          "discount_type": "percentage",
+          "value": 15.00,
+          "entries_count": 0,
+          "min_purchase": 0.00,
+          "campaign_name": "Descuento Especial 15%"
+        }
+      },
+      "response_400": {
+        "error": "Cupón inválido o expirado"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/coupons/claim",
+      "description": "Claim free promotional entries using a coupon code",
+      "request_body": {
+        "code": "string (required)",
+        "user_id": "integer (required)"
+      },
+      "response_200": {
+        "message": "¡Cupón canjeado con éxito! Se han acreditado 700 entradas a tu Garage.",
+        "entries_added": 700,
+        "total_entries": 1450
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/coupons",
+      "description": "List all coupons and summary metrics for admin dashboard",
+      "response_200": {
+        "coupons": [
+          {
+            "id": 1,
+            "code": "BORDER700",
+            "reward_type": "entries",
+            "entries_count": 700,
+            "usage_count": 1,
+            "usage_limit": 1,
+            "is_active": 1
+          }
+        ],
+        "metrics": {
+          "totalCoupons": 5,
+          "usedCoupons": 2,
+          "redemptionRate": 40.0,
+          "totalEntriesGifted": 1400
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/coupons",
+      "description": "Create a new coupon",
+      "request_body": {
+        "code": "string (required)",
+        "reward_type": "entries | discount (required)",
+        "discount_type": "percentage | fixed",
+        "value": "number",
+        "entries_count": "integer",
+        "usage_limit": "integer",
+        "campaign_name": "string"
+      },
+      "response_201": {
+        "id": 6,
+        "code": "SUMMER2026",
+        "is_active": 1
+      }
+    }
+  ]
+}

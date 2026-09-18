@@ -1,0 +1,243 @@
+[
+  {
+    "id": "prod_001",
+    "name": "BORDERBUILT Hoodie",
+    "slug": "border-spec-hoodie",
+    "category": "hoodies",
+    "description": "Premium heavyweight hoodie with neon BORDERBUILT logo. Represents the binational car culture of Juárez-El Paso.",
+    "price": 65.00,
+    "compareAtPrice": 78.00,
+    "variants": [
+      { "size": "S", "color": "Black/Neon", "stock": 50 },
+      { "size": "M", "color": "Black/Neon", "stock": 80 },
+      { "size": "L", "color": "Black/Neon", "stock": 60 },
+      { "size": "XL", "color": "Black/Neon", "stock": 40 },
+      { "size": "XXL", "color": "Black/Neon", "stock": 20 }
+    ],
+    "images": ["/images/products/hoodie-black-neon.png"],
+    "tags": ["BEST SELLER"],
+    "entryMultiplier": null,
+    "featured": true,
+    "createdAt": "2024-01-15T00:00:00.000Z",
+    "updatedAt": "2024-06-01T00:00:00.000Z"
+  },
+  {
+    "id": "prod_002",
+    "name": "R34 Legacy Tee",
+    "slug": "r34-legacy-tee",
+    "category": "tshirts",
+    "description": "Heavy cotton tee featuring the legendary Skyline R34 silhouette. JDM heritage meets border culture.",
+    "price": 35.00,
+    "compareAtPrice": 42.00,
+    "variants": [
+      { "size": "S", "color": "Black", "stock": 100 },
+      { "size": "M", "color": "Black", "stock": 120 },
+      { "size": "L", "color": "Black", "stock": 90 },
+      { "size": "XL", "color": "Black", "stock": 60 },
+      { "size": "S", "color": "Charcoal", "stock": 40 },
+      { "size": "M", "color": "Charcoal", "stock": 50 },
+      { "size": "L", "color": "Charcoal", "stock": 45 }
+    ],
+    "images": ["/images/products/r34-legacy-tee.png"],
+    "tags": ["NEW DROP"],
+    "entryMultiplier": null,
+    "featured": true,
+    "createdAt": "2024-03-01T00:00:00.000Z",
+    "updatedAt": "2024-06-01T00:00:00.000Z"
+  },
+  {
+    "id": "prod_003",
+    "name": "Drift Keytag",
+    "slug": "drift-keytag",
+    "category": "accessories",
+    "description": "Flight crew style embroidered keytag. 'Remove Before Flight' meets 'Remove Before Drift'.",
+    "price": 15.00,
+    "compareAtPrice": 18.00,
+    "variants": [
+      { "size": "ONE SIZE", "color": "Neon Green", "stock": 200 },
+      { "size": "ONE SIZE", "color": "Red", "stock": 150 }
+    ],
+    "images": ["/images/products/accessories-group.png"],
+    "tags": [],
+    "entryMultiplier": null,
+    "featured": false,
+    "createdAt": "2024-02-10T00:00:00.000Z",
+    "updatedAt": "2024-06-01T00:00:00.000Z"
+  },
+  {
+    "id": "prod_004",
+    "name": "Tuner Cap",
+    "slug": "tuner-cap",
+    "category": "accessories",
+    "description": "Snapback cap with flat brim. Embroidered BORDERBUILT logo with neon green stitching.",
+    "price": 30.00,
+    "compareAtPrice": 36.00,
+    "variants": [
+      { "size": "ONE SIZE", "color": "Black", "stock": 80 },
+      { "size": "ONE SIZE", "color": "Carbon Grey", "stock": 60 }
+    ],
+    "images": ["/images/products/tuner-cap.png"],
+    "tags": [],
+    "entryMultiplier": null,
+    "featured": false,
+    "createdAt": "2024-01-20T00:00:00.000Z",
+    "updatedAt": "2024-06-01T00:00:00.000Z"
+  },
+  {
+    "id": "prod_005",
+    "name": "Decal Pack V1",
+    "slug": "decal-pack-v1",
+    "category": "accessories",
+    "description": "Holographic vinyl decal pack. Includes BORDERBUILT logo, JZ-EPTX badge, and speed marks.",
+    "price": 12.00,
+    "compareAtPrice": 15.00,
+    "variants": [
+      { "size": "6 inch", "color": "Holographic", "stock": 300 },
+      { "size": "10 inch", "color": "Holographic", "stock": 200 }
+    ],
+    "images": ["/images/products/accessories-group.png"],
+    "tags": [],
+    "entryMultiplier": null,
+    "featured": false,
+    "createdAt": "2024-04-01T00:00:00.000Z",
+    "updatedAt": "2024-06-01T00:00:00.000Z"
+  },
+  {
+    "id": "prod_006",
+    "name": "Mystery Box",
+    "slug": "mystery-box",
+    "category": "mystery",
+    "description": "Limited edition mystery box. Contains 3-5 exclusive items not available in the store. High entry multiplier.",
+    "price": 100.00,
+    "compareAtPrice": 150.00,
+    "variants": [
+      { "size": "Standard", "color": "Surprise", "stock": 50 }
+    ],
+    "images": ["/images/products/mystery-box.png"],
+    "tags": ["HIGH VALUE"],
+    "entryMultiplier": 15,
+    "featured": true,
+    "createdAt": "2024-05-01T00:00:00.000Z",
+    "updatedAt": "2024-06-01T00:00:00.000Z"
+  },
+  {
+    "id": "prod_007",
+    "name": "JZ-EPTX Racing Jacket",
+    "slug": "jz-eptx-racing-jacket",
+    "category": "hoodies",
+    "description": "Lightweight racing-style jacket with reflective BORDERBUILT patches. Built for car meets and night drives.",
+    "price": 95.00,
+    "compareAtPrice": 120.00,
+    "variants": [
+      { "size": "S", "color": "Black/Green", "stock": 30 },
+      { "size": "M", "color": "Black/Green", "stock": 45 },
+      { "size": "L", "color": "Black/Green", "stock": 35 },
+      { "size": "XL", "color": "Black/Green", "stock": 25 }
+    ],
+    "images": ["/images/products/racing-jacket.png"],
+    "tags": ["NEW DROP"],
+    "entryMultiplier": null,
+    "featured": true,
+    "createdAt": "2024-05-15T00:00:00.000Z",
+    "updatedAt": "2024-06-01T00:00:00.000Z"
+  },
+  {
+    "id": "prod_008",
+    "name": "Boost Gauge Tee",
+    "slug": "boost-gauge-tee",
+    "category": "tshirts",
+    "description": "Graphic tee with oversized boost gauge print. 'Running 22 PSI on the border.'",
+    "price": 35.00,
+    "compareAtPrice": 42.00,
+    "variants": [
+      { "size": "S", "color": "Black", "stock": 70 },
+      { "size": "M", "color": "Black", "stock": 90 },
+      { "size": "L", "color": "Black", "stock": 75 },
+      { "size": "XL", "color": "Black", "stock": 50 }
+    ],
+    "images": ["/images/products/r34-legacy-tee.png"],
+    "tags": [],
+    "entryMultiplier": null,
+    "featured": false,
+    "createdAt": "2024-04-10T00:00:00.000Z",
+    "updatedAt": "2024-06-01T00:00:00.000Z"
+  },
+  {
+    "id": "prod_009",
+    "name": "Carbon Fiber Phone Case",
+    "slug": "carbon-fiber-phone-case",
+    "category": "accessories",
+    "description": "Real carbon fiber weave phone case with BORDERBUILT logo. Available for iPhone and Samsung.",
+    "price": 45.00,
+    "compareAtPrice": 55.00,
+    "variants": [
+      { "size": "iPhone 15", "color": "Carbon", "stock": 60 },
+      { "size": "iPhone 15 Pro", "color": "Carbon", "stock": 70 },
+      { "size": "Samsung S24", "color": "Carbon", "stock": 40 }
+    ],
+    "images": ["/images/products/accessories-group.png"],
+    "tags": [],
+    "entryMultiplier": null,
+    "featured": false,
+    "createdAt": "2024-03-20T00:00:00.000Z",
+    "updatedAt": "2024-06-01T00:00:00.000Z"
+  },
+  {
+    "id": "prod_010",
+    "name": "Sin Fronteras Joggers",
+    "slug": "sin-fronteras-joggers",
+    "category": "hoodies",
+    "description": "Technical joggers with tapered fit. 'Sin Fronteras para la Velocidad' embroidered on the thigh.",
+    "price": 55.00,
+    "compareAtPrice": 68.00,
+    "variants": [
+      { "size": "S", "color": "Black", "stock": 40 },
+      { "size": "M", "color": "Black", "stock": 55 },
+      { "size": "L", "color": "Black", "stock": 50 },
+      { "size": "XL", "color": "Black", "stock": 30 }
+    ],
+    "images": ["/images/products/sin-fronteras-joggers.png"],
+    "tags": ["BEST SELLER"],
+    "entryMultiplier": null,
+    "featured": true,
+    "createdAt": "2024-02-28T00:00:00.000Z",
+    "updatedAt": "2024-06-01T00:00:00.000Z"
+  },
+  {
+    "id": "prod_011",
+    "name": "Turbo Timer Beanie",
+    "slug": "turbo-timer-beanie",
+    "category": "accessories",
+    "description": "Knit beanie with embroidered turbo timer icon. Perfect for cold desert nights at the car meet.",
+    "price": 25.00,
+    "compareAtPrice": 30.00,
+    "variants": [
+      { "size": "ONE SIZE", "color": "Black", "stock": 100 },
+      { "size": "ONE SIZE", "color": "Dark Green", "stock": 80 }
+    ],
+    "images": ["/images/products/turbo-beanie.png"],
+    "tags": [],
+    "entryMultiplier": null,
+    "featured": false,
+    "createdAt": "2024-01-25T00:00:00.000Z",
+    "updatedAt": "2024-06-01T00:00:00.000Z"
+  },
+  {
+    "id": "prod_012",
+    "name": "Spec Sheet Poster",
+    "slug": "spec-sheet-poster",
+    "category": "accessories",
+    "description": "24x36 matte poster with R34 technical spec sheet blueprint. Museum quality print.",
+    "price": 28.00,
+    "compareAtPrice": 35.00,
+    "variants": [
+      { "size": "24x36", "color": "Black/Neon", "stock": 150 }
+    ],
+    "images": ["/images/products/spec-poster.png"],
+    "tags": [],
+    "entryMultiplier": null,
+    "featured": false,
+    "createdAt": "2024-04-15T00:00:00.000Z",
+    "updatedAt": "2024-06-01T00:00:00.000Z"
+  }
+]

@@ -1,0 +1,107 @@
+{
+  "domain": "Orders",
+  "description": "Cart checkout, order creation, and order history.",
+  "baseUrl": "/api/orders",
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/api/orders",
+      "description": "Create a new order from the cart (checkout). This is the critical path that awards entries.",
+      "auth": "Required",
+      "requestBody": {
+        "items": [
+          {
+            "productId": "string (required)",
+            "name": "string",
+            "size": "string",
+            "color": "string",
+            "price": "number (required)",
+            "quantity": "number (required, integer >= 1)"
+          }
+        ],
+        "shippingAddress": "string (required)"
+      },
+      "response": {
+        "type": "object",
+        "schema": {
+          "id": "string (ord_XXX)",
+          "userId": "string",
+          "items": "array (same as request)",
+          "subtotal": "number",
+          "shipping": "number (0 if over freeShippingThreshold)",
+          "total": "number",
+          "entriesEarned": "number (calculated server-side)",
+          "multiplierUsed": "number",
+          "status": "string ('pending' | 'completed' | 'cancelled')",
+          "shippingAddress": "string",
+          "createdAt": "string (ISO 8601)",
+          "updatedAt": "string (ISO 8601)"
+        },
+        "example": {
+          "id": "ord_001",
+          "userId": "usr_carlos",
+          "items": [
+            { "productId": "prod_001", "name": "BORDERBUILT Hoodie", "size": "L", "color": "Black/Neon", "price": 65.00, "quantity": 2 }
+          ],
+          "subtotal": 130.00,
+          "shipping": 0,
+          "total": 130.00,
+          "entriesEarned": 1300,
+          "multiplierUsed": 10,
+          "status": "completed",
+          "shippingAddress": "123 Mesa St, El Paso, TX 79901",
+          "createdAt": "2024-03-15T14:30:00.000Z",
+          "updatedAt": "2024-03-15T14:30:00.000Z"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "description": "Get all orders for the authenticated user.",
+      "auth": "Required",
+      "queryParams": {
+        "status": { "type": "string", "optional": true, "enum": ["pending", "completed", "cancelled"] }
+      },
+      "response": {
+        "type": "array",
+        "description": "Array of order objects (same schema as POST response)."
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders/:id",
+      "description": "Get a single order by ID.",
+      "auth": "Required (owner or admin)",
+      "response": {
+        "type": "object",
+        "description": "Single order object."
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/orders",
+      "description": "Get ALL orders across all users (admin only).",
+      "auth": "Required (admin role)",
+      "queryParams": {
+        "userId": { "type": "string", "optional": true },
+        "status": { "type": "string", "optional": true },
+        "dateFrom": { "type": "string (ISO 8601)", "optional": true },
+        "dateTo": { "type": "string (ISO 8601)", "optional": true }
+      },
+      "response": {
+        "type": "array",
+        "description": "Array of all order objects, filterable."
+      }
+    }
+  ],
+  "businessRules": [
+    "CRITICAL: Entries MUST be calculated server-side, never trust client-side calculations.",
+    "Entry formula: floor(item.price × multiplier) × item.quantity, summed across all items.",
+    "If a product has its own entryMultiplier, use that instead of the global one.",
+    "Free shipping if subtotal >= config.freeShippingThreshold (currently $100).",
+    "After order completion, update the user's entries and totalSpent fields.",
+    "Stock should be decremented for each variant purchased.",
+    "Orders should be validated: check stock, check product exists, check prices match."
+  ]
+}

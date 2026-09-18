@@ -1,0 +1,70 @@
+[
+  {
+    "id": "ord_001",
+    "userId": "usr_carlos",
+    "items": [
+      { "productId": "prod_001", "name": "BORDERBUILT Hoodie", "size": "L", "color": "Black/Neon", "price": 65.00, "quantity": 2 },
+      { "productId": "prod_003", "name": "Drift Keytag", "size": "ONE SIZE", "color": "Neon Green", "price": 15.00, "quantity": 1 }
+    ],
+    "subtotal": 145.00,
+    "shipping": 0,
+    "total": 145.00,
+    "entriesEarned": 1450,
+    "multiplierUsed": 10,
+    "status": "completed",
+    "shippingAddress": "123 Mesa St, El Paso, TX 79901",
+    "createdAt": "2024-03-15T14:30:00.000Z",
+    "updatedAt": "2024-03-18T10:00:00.000Z"
+  },
+  {
+    "id": "ord_002",
+    "userId": "usr_ana",
+    "items": [
+      { "productId": "prod_006", "name": "Mystery Box", "size": "Standard", "color": "Surprise", "price": 100.00, "quantity": 1 },
+      { "productId": "prod_002", "name": "R34 Legacy Tee", "size": "M", "color": "Black", "price": 35.00, "quantity": 2 }
+    ],
+    "subtotal": 170.00,
+    "shipping": 0,
+    "total": 170.00,
+    "entriesEarned": 2200,
+    "multiplierUsed": 10,
+    "status": "completed",
+    "shippingAddress": "Av. Tecnológico 456, Cd. Juárez, CHIH",
+    "createdAt": "2024-04-02T18:45:00.000Z",
+    "updatedAt": "2024-04-06T12:00:00.000Z"
+  },
+  {
+    "id": "ord_003",
+    "userId": "usr_luis",
+    "items": [
+      { "productId": "prod_007", "name": "JZ-EPTX Racing Jacket", "size": "M", "color": "Black/Green", "price": 95.00, "quantity": 1 }
+    ],
+    "subtotal": 95.00,
+    "shipping": 8.99,
+    "total": 103.99,
+    "entriesEarned": 950,
+    "multiplierUsed": 10,
+    "status": "completed",
+    "shippingAddress": "789 Montana Ave, El Paso, TX 79902",
+    "createdAt": "2024-05-10T11:20:00.000Z",
+    "updatedAt": "2024-05-14T09:00:00.000Z"
+  },
+  {
+    "id": "ord_004",
+    "userId": "usr_demo",
+    "items": [
+      { "productId": "prod_001", "name": "BORDERBUILT Hoodie", "size": "M", "color": "Black/Neon", "price": 65.00, "quantity": 1 },
+      { "productId": "prod_004", "name": "Tuner Cap", "size": "ONE SIZE", "color": "Black", "price": 30.00, "quantity": 1 },
+      { "productId": "prod_005", "name": "Decal Pack V1", "size": "6 inch", "color": "Holographic", "price": 12.00, "quantity": 2 }
+    ],
+    "subtotal": 119.00,
+    "shipping": 0,
+    "total": 119.00,
+    "entriesEarned": 1190,
+    "multiplierUsed": 10,
+    "status": "completed",
+    "shippingAddress": "456 Paisano Dr, El Paso, TX 79901",
+    "createdAt": "2024-06-01T09:15:00.000Z",
+    "updatedAt": "2024-06-04T14:30:00.000Z"
+  }
+]

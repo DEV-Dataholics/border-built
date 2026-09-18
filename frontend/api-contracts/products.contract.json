@@ -1,0 +1,125 @@
+{
+  "domain": "Products",
+  "description": "Product catalog CRUD with variants, pricing, and entry multipliers.",
+  "baseUrl": "/api/products",
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/products",
+      "description": "List all products. Supports filtering by category, tag, and featured status.",
+      "queryParams": {
+        "category": { "type": "string", "optional": true, "enum": ["hoodies", "tshirts", "accessories", "mystery"] },
+        "featured": { "type": "boolean", "optional": true },
+        "tag": { "type": "string", "optional": true }
+      },
+      "response": {
+        "type": "array",
+        "itemSchema": {
+          "id": "string (prod_XXX)",
+          "name": "string",
+          "slug": "string (URL-safe)",
+          "category": "string",
+          "description": "string",
+          "price": "number (USD)",
+          "compareAtPrice": "number (USD, original price for discount display)",
+          "variants": [
+            {
+              "size": "string",
+              "color": "string",
+              "stock": "number (integer)"
+            }
+          ],
+          "images": ["string (URL path)"],
+          "tags": ["string (e.g. 'BEST SELLER', 'NEW DROP', 'HIGH VALUE')"],
+          "entryMultiplier": "number | null (null = use global multiplier)",
+          "featured": "boolean",
+          "createdAt": "string (ISO 8601)",
+          "updatedAt": "string (ISO 8601)"
+        },
+        "example": {
+          "id": "prod_001",
+          "name": "BORDERBUILT Hoodie",
+          "slug": "border-spec-hoodie",
+          "category": "hoodies",
+          "description": "Premium heavyweight hoodie with neon BORDERBUILT logo.",
+          "price": 65.00,
+          "compareAtPrice": 78.00,
+          "variants": [
+            { "size": "S", "color": "Black/Neon", "stock": 50 },
+            { "size": "M", "color": "Black/Neon", "stock": 80 }
+          ],
+          "images": ["/images/products/hoodie-black-neon.png"],
+          "tags": ["BEST SELLER"],
+          "entryMultiplier": null,
+          "featured": true,
+          "createdAt": "2024-01-15T00:00:00.000Z",
+          "updatedAt": "2024-06-01T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/products/:slug",
+      "description": "Get a single product by slug.",
+      "params": {
+        "slug": "string"
+      },
+      "response": {
+        "type": "object",
+        "schema": "(same as item in list endpoint)"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/products",
+      "description": "Create a new product (admin only).",
+      "auth": "Required (admin role)",
+      "requestBody": {
+        "name": "string (required)",
+        "slug": "string (required, unique)",
+        "category": "string (required)",
+        "description": "string (required)",
+        "price": "number (required)",
+        "compareAtPrice": "number (optional)",
+        "variants": "array (required, at least 1)",
+        "images": "array of strings (required)",
+        "tags": "array of strings (optional, default [])",
+        "entryMultiplier": "number | null (optional, default null)",
+        "featured": "boolean (optional, default false)"
+      },
+      "response": {
+        "type": "object",
+        "description": "The created product with generated id and timestamps."
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/products/:id",
+      "description": "Update a product (admin only).",
+      "auth": "Required (admin role)",
+      "requestBody": {
+        "description": "Partial update — only fields that need changing."
+      },
+      "response": {
+        "type": "object",
+        "description": "The updated product."
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/products/:id",
+      "description": "Delete a product (admin only).",
+      "auth": "Required (admin role)",
+      "response": {
+        "type": "object",
+        "example": { "success": true }
+      }
+    }
+  ],
+  "businessRules": [
+    "Product slugs must be unique and URL-safe.",
+    "If entryMultiplier is null, the frontend uses the global multiplier from config.",
+    "Variant stock should be decremented on order completion.",
+    "The compareAtPrice is used to display 'was $X' crossed-out pricing."
+  ]
+}

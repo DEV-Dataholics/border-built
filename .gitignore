@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build outputs
+dist/
+build/
+
+# Environment and sensitive keys
+.env
+.env.local
+.env.production
+.credentials.local
+
+# Logs and runtime
+*.log
+backend/writable/cache/*
+!backend/writable/cache/.gitkeep
+backend/writable/logs/*
+!backend/writable/logs/.gitkeep
+backend/writable/session/*
+!backend/writable/session/.gitkeep
+backend/writable/debugbar/*
+!backend/writable/debugbar/.gitkeep
+
+# System & IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+__pycache__/
+*.pyc
+test-results/
+.pytest_cache/

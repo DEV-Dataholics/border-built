@@ -1,0 +1,67 @@
+[
+  {
+    "id": "usr_admin",
+    "email": "admin@borderbuilt.com",
+    "name": "Admin BB",
+    "role": "admin",
+    "password": "admin123",
+    "avatar": null,
+    "entries": 0,
+    "totalSpent": 0,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "usr_carlos",
+    "email": "carlos.m@test.com",
+    "name": "Carlos M.",
+    "role": "user",
+    "password": "test123",
+    "avatar": null,
+    "entries": 8750,
+    "totalSpent": 875.00,
+    "location": "El Paso, TX",
+    "createdAt": "2023-03-15T00:00:00.000Z",
+    "updatedAt": "2024-06-01T00:00:00.000Z"
+  },
+  {
+    "id": "usr_ana",
+    "email": "ana.r@test.com",
+    "name": "Ana R.",
+    "role": "user",
+    "password": "test123",
+    "avatar": null,
+    "entries": 9200,
+    "totalSpent": 920.00,
+    "location": "Cd. Juárez, MX",
+    "createdAt": "2023-02-10T00:00:00.000Z",
+    "updatedAt": "2024-05-20T00:00:00.000Z"
+  },
+  {
+    "id": "usr_luis",
+    "email": "luis.g@test.com",
+    "name": "Luis G.",
+    "role": "user",
+    "password": "test123",
+    "avatar": null,
+    "entries": 6500,
+    "totalSpent": 650.00,
+    "location": "El Paso, TX",
+    "createdAt": "2023-05-01T00:00:00.000Z",
+    "updatedAt": "2024-04-15T00:00:00.000Z"
+  },
+  {
+    "id": "usr_demo",
+    "email": "demo@borderbuilt.com",
+    "name": "Demo User",
+    "role": "user",
+    "is_vip": true,
+    "password": "demo123",
+    "avatar": null,
+    "entries": 3500,
+    "totalSpent": 350.00,
+    "location": "El Paso, TX",
+    "createdAt": "2024-01-10T00:00:00.000Z",
+    "updatedAt": "2024-06-05T00:00:00.000Z"
+  }
+]
