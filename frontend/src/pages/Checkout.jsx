@@ -10,6 +10,7 @@ import { useConfigStore } from '../stores/useConfigStore';
 import { useGiveawayStore } from '../stores/useGiveawayStore';
 import { useTranslation } from '../i18n/useTranslation';
 import { LOCATION_DATA } from '../lib/locationData';
+import { getStateTaxInfo } from '../lib/taxRates';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import EntryCounter from '../components/features/EntryCounter';
@@ -122,6 +123,7 @@ const CheckoutContent = () => {
   const subtotal = getSubtotal();
   const discount = getDiscount();
   const shipping = getShipping();
+  const taxInfo = getStateTaxInfo(form.state);
   const tax = getTax ? getTax(form.state) : 0.00;
   const total = getTotal ? getTotal(form.state) : (Math.max(0, subtotal - discount) + tax + shipping);
   const totalEntries = getTotalEntries();
@@ -671,8 +673,8 @@ const CheckoutContent = () => {
 
                       <div className="flex justify-between text-xs text-gray-400 font-mono">
                         <span>
-                          {form.state === 'TX' || form.state?.toUpperCase() === 'TEXAS'
-                            ? (lang === 'es' ? 'Impuesto de Venta (TX 8.25%)' : 'Sales Tax (TX 8.25%)')
+                          {taxInfo.rate > 0
+                            ? (lang === 'es' ? `Impuesto de Venta (${taxInfo.code} ${taxInfo.label})` : `Sales Tax (${taxInfo.code} ${taxInfo.label})`)
                             : (lang === 'es' ? 'Impuesto Estimado' : 'Estimated Tax')}
                         </span>
                         <span className="text-gray-300">${tax.toFixed(2)}</span>

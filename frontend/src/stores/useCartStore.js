@@ -6,6 +6,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { calculateEntries } from '../lib/entries';
+import { getStateTaxInfo } from '../lib/taxRates';
 
 const useCartStore = create(
   persist(
@@ -147,11 +148,10 @@ const useCartStore = create(
       getTax: (shippingState = '') => {
         const subtotal = get().getSubtotal();
         const discount = get().getDiscount();
-        const stateUpper = (shippingState || '').toUpperCase().trim();
-        const isTx = stateUpper === 'TX' || stateUpper === 'TEXAS';
-        if (!isTx) return 0.00;
+        const { rate } = getStateTaxInfo(shippingState);
+        if (!rate || rate <= 0) return 0.00;
         const taxable = Math.max(0, subtotal - discount);
-        return Math.round(taxable * 0.0825 * 100) / 100;
+        return Math.round(taxable * rate * 100) / 100;
       },
 
       getTotal: (shippingState = '') => {
