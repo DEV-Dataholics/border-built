@@ -33,7 +33,21 @@ class OrderController extends ResourceController
         }
 
         $userId = $data['userId'] ?? 'guest';
-        $orderId = 'ord_' . uniqid();
+
+        // Sequential Order Counter starting on Order 1
+        $db = \Config\Database::connect();
+        try {
+            $db->query("CREATE TABLE IF NOT EXISTS order_sequence (
+                id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4");
+            $db->query("INSERT INTO order_sequence () VALUES ()");
+            $orderNumber = (int) $db->insertID();
+        } catch (\Throwable $e) {
+            $maxRow = $db->query("SELECT MAX(CAST(id AS UNSIGNED)) AS max_id FROM orders")->getRow();
+            $orderNumber = ($maxRow && $maxRow->max_id) ? ((int)$maxRow->max_id + 1) : 1;
+        }
+        $orderId = (string) $orderNumber;
 
         $subtotal = (float)($data['subtotal'] ?? 0);
         $shipping = (float)($data['shipping'] ?? 0);
