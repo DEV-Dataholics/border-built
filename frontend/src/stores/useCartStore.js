@@ -144,11 +144,22 @@ const useCartStore = create(
         return subtotal >= 100 ? 0 : 8.99;
       },
 
-      getTotal: () => {
+      getTax: (shippingState = '') => {
+        const subtotal = get().getSubtotal();
+        const discount = get().getDiscount();
+        const stateUpper = (shippingState || '').toUpperCase().trim();
+        const isTx = stateUpper === 'TX' || stateUpper === 'TEXAS';
+        if (!isTx) return 0.00;
+        const taxable = Math.max(0, subtotal - discount);
+        return Math.round(taxable * 0.0825 * 100) / 100;
+      },
+
+      getTotal: (shippingState = '') => {
         const subtotal = get().getSubtotal();
         const discount = get().getDiscount();
         const shipping = get().getShipping();
-        return Math.max(0, subtotal - discount) + shipping;
+        const tax = get().getTax(shippingState);
+        return Math.round((Math.max(0, subtotal - discount) + tax + shipping) * 100) / 100;
       },
     }),
     {

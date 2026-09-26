@@ -62,6 +62,8 @@ $routes->group('api', ['namespace' => 'App\\Controllers\\Api'], static function 
     $routes->get('products/(:segment)', 'ProductController::show/$1');
     $routes->get('users/(:segment)', 'UserController::show/$1');
     $routes->get('giveaways/active', 'GiveawayController::getActive');
+    $routes->get('checkout-status', 'OrderController::checkoutStatus');
+    $routes->options('checkout-status', 'OrderController::options');
 
     // Auth Routes
     $routes->post('auth/register', 'AuthController::register');

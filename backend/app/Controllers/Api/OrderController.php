@@ -17,8 +17,32 @@ class OrderController extends ResourceController
         return $this->response->setStatusCode(200);
     }
 
+    public function checkoutStatus()
+    {
+        $db = \Config\Database::connect();
+        $cfgRow = $db->table('configs')->where('key', 'checkout_enabled')->get()->getRowArray();
+        $enabled = ($cfgRow && $cfgRow['value'] === 'true');
+        return $this->respond([
+            'checkoutEnabled' => $enabled,
+            'taxRateTexas' => 0.0825,
+            'message' => $enabled ? 'Checkout is active' : 'Checkout is temporarily paused for launch preparations.'
+        ]);
+    }
+
     public function create()
     {
+        $db = \Config\Database::connect();
+
+        // Launch Guard: reject orders if checkout is paused
+        $cfgRow = $db->table('configs')->where('key', 'checkout_enabled')->get()->getRowArray();
+        $isCheckoutEnabled = ($cfgRow && $cfgRow['value'] === 'true');
+        if (!$isCheckoutEnabled) {
+            return $this->response->setStatusCode(423)->setJSON([
+                'status' => 'error',
+                'message' => 'Online checkout is temporarily paused for final launch preparations. Please check back shortly.'
+            ]);
+        }
+
         $orderModel = new OrderModel();
         $userModel = new UserModel();
         $productModel = new ProductModel();
@@ -35,7 +59,6 @@ class OrderController extends ResourceController
         $userId = $data['userId'] ?? 'guest';
 
         // Sequential Order Counter starting on Order 1
-        $db = \Config\Database::connect();
         try {
             $db->query("CREATE TABLE IF NOT EXISTS order_sequence (
                 id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -83,7 +106,23 @@ class OrderController extends ResourceController
             }
         }
 
-        $finalTotal = max(0, round($subtotal - $discountAmount + $shipping, 2));
+        // 1. Calculate Tax (Texas 8.25%, other states 0.00%)
+        $shippingState = strtoupper(trim($data['shippingState'] ?? ''));
+        if (empty($shippingState) && !empty($data['shippingAddress'])) {
+            if (preg_match('/\b(TX|TEXAS)\b/i', $data['shippingAddress'])) {
+                $shippingState = 'TX';
+            }
+        }
+
+        $taxRate = 0.00;
+        if ($shippingState === 'TX' || $shippingState === 'TEXAS') {
+            $taxRate = 0.0825; // 8.25% Texas State & Local Sales Tax
+        }
+
+        $taxableAmount = max(0, $subtotal - $discountAmount);
+        $taxAmount = round($taxableAmount * $taxRate, 2);
+
+        $finalTotal = max(0, round($taxableAmount + $taxAmount + $shipping, 2));
 
         // Deducción de Stock (Standard & Mystery Box bundle items)
         if (isset($data['items']) && is_array($data['items'])) {
@@ -135,6 +174,7 @@ class OrderController extends ResourceController
                     'coupon_code' => $couponCode ?? 'NONE',
                     'discount_amount' => $discountAmount,
                     'subtotal' => $subtotal,
+                    'tax' => $taxAmount,
                     'shipping' => $shipping,
                     'total' => $finalTotal,
                 ]
@@ -155,6 +195,7 @@ class OrderController extends ResourceController
             'shipping'                 => $shipping,
             'coupon_code'              => $couponCode,
             'discount'                 => $discountAmount,
+            'tax'                      => $taxAmount,
             'total'                    => $finalTotal,
             'entries_earned'           => $data['entriesEarned'] ?? 0,
             'multiplier_used'          => $data['multiplierUsed'] ?? 1,

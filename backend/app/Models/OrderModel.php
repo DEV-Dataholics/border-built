@@ -25,6 +25,7 @@ class OrderModel extends Model
         'shipping_address',
         'coupon_code',
         'discount',
+        'tax',
         'stripe_payment_intent_id',
         'idempotency_key'
     ];

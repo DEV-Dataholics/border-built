@@ -34,13 +34,28 @@ const CheckoutContent = () => {
   const elements = useElements();
   
   const { 
-    items, getSubtotal, getShipping, getDiscount, getTotal, getTotalEntries, 
+    items, getSubtotal, getShipping, getDiscount, getTotal, getTax, getTotalEntries, 
     appliedCoupon, applyCoupon, removeCoupon, clearCart 
   } = useCartStore();
   const { user } = useAuthStore();
   const getMultiplier = useConfigStore((state) => state.getMultiplier);
   const multiplier = getMultiplier();
   const { addEntries } = useGiveawayStore();
+
+  const [checkoutEnabled, setCheckoutEnabled] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL}/checkout-status`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data && typeof data.checkoutEnabled === 'boolean') {
+          setCheckoutEnabled(data.checkoutEnabled);
+        }
+      })
+      .catch(() => setCheckoutEnabled(false))
+      .finally(() => setCheckoutLoading(false));
+  }, []);
 
   const [step, setStep] = useState('form'); // 'form' | 'processing' | 'confirmed'
   const [finalEntries, setFinalEntries] = useState(0);
@@ -107,7 +122,8 @@ const CheckoutContent = () => {
   const subtotal = getSubtotal();
   const discount = getDiscount();
   const shipping = getShipping();
-  const total = getTotal();
+  const tax = getTax ? getTax(form.state) : 0.00;
+  const total = getTotal ? getTotal(form.state) : (Math.max(0, subtotal - discount) + tax + shipping);
   const totalEntries = getTotalEntries();
 
   const handleChange = (e) => {
@@ -216,6 +232,7 @@ const CheckoutContent = () => {
   // Stripe Payment Submission Logic
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!checkoutEnabled) return;
     if (!stripe || !elements) return; // Stripe not loaded
 
     setStep('processing');
@@ -245,6 +262,8 @@ const CheckoutContent = () => {
         shipping,
         couponCode: appliedCoupon?.code || null,
         discount: discount,
+        tax: tax,
+        shippingState: form.state,
         total,
         entriesEarned: totalEntries,
         multiplierUsed: multiplier,
@@ -471,31 +490,67 @@ const CheckoutContent = () => {
                     <Input label={t('checkout.zip')} name="zip" value={form.zip} onChange={handleChange} placeholder="79901" required />
                   </div>
 
-                  {/* MÉTODO DE PAGO (STRIPE ELEMENTS) */}
-                  <div className="border-t border-white/10 pt-6 mt-2 flex flex-col gap-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <h2 className="text-xl font-bold uppercase italic text-white">
-                          Método de Pago
-                        </h2>
-                        <span className="bg-primary/20 text-primary text-[10px] font-mono font-bold px-2 py-0.5 rounded border border-primary/30 uppercase">
-                          Stripe Secure
+                  {/* MÉTODO DE PAGO (STRIPE ELEMENTS) O AVISO DE LANZAMIENTO */}
+                  {!checkoutEnabled ? (
+                    <div className="border-t border-white/10 pt-6 mt-2 flex flex-col gap-4">
+                      <div className="relative overflow-hidden bg-gradient-to-br from-[#121212] via-black to-[#0a0a0a] border border-primary/40 rounded-2xl p-6 sm:p-8 text-center shadow-[0_0_40px_rgba(106,244,37,0.12)]">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
+                        
+                        <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/40 text-primary flex items-center justify-center mx-auto mb-4 shadow-[0_0_25px_rgba(106,244,37,0.25)]">
+                          <span className="material-symbols-outlined text-3xl animate-pulse">lock_clock</span>
+                        </div>
+                        
+                        <span className="inline-block bg-primary/20 text-primary border border-primary/30 text-[10px] font-mono font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-3">
+                          {lang === 'es' ? 'Lanzamiento Oficial en Preparación' : 'Official Launch in Preparation'}
                         </span>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-[11px] text-gray-400 font-mono">
-                        <span className="material-symbols-outlined text-primary text-sm">lock</span>
-                        <span>SSL 256-Bit</span>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-black/60 border border-primary/30 rounded-xl p-4 shadow-[0_0_20px_rgba(106,244,37,0.05)]">
-                      <PaymentElement options={{ layout: 'tabs' }} />
-                    </div>
-                  </div>
 
-                  <Button type="submit" size="lg" disabled={!stripe} className="w-full mt-4 py-4 text-sm font-black tracking-widest uppercase shadow-[0_0_20px_rgba(106,244,37,0.3)]">
-                    {lang === 'es' ? 'CONFIRMAR Y PAGAR CON STRIPE' : 'CONFIRM AND PAY WITH STRIPE'} (${total.toFixed(2)})
-                  </Button>
+                        <h3 className="text-xl sm:text-2xl font-black italic uppercase tracking-wider text-white mb-3">
+                          {lang === 'es' ? 'PASARELA DE PAGO EN ESPERA' : 'PAYMENTS OPENING SHORTLY'}
+                        </h3>
+                        
+                        <p className="text-xs sm:text-sm text-gray-300 font-mono leading-relaxed max-w-lg mx-auto mb-6">
+                          {lang === 'es'
+                            ? 'Los pagos se habilitarán oficialmente en breve con la apertura de la tienda. Puedes explorar todo el catálogo de productos y armar tu carrito con anticipación.'
+                            : 'Online payments are temporarily paused while final launch preparations are finalized. You can freely explore the gear catalog and prepare your cart in advance!'}
+                        </p>
+
+                        <div className="inline-flex items-center gap-2.5 bg-black/60 border border-white/15 rounded-full px-4 py-2 text-xs font-mono text-gray-300">
+                          <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                          </span>
+                          <span>{lang === 'es' ? 'Pagos desbloqueándose muy pronto' : 'Unlocking very soon'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="border-t border-white/10 pt-6 mt-2 flex flex-col gap-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <h2 className="text-xl font-bold uppercase italic text-white">
+                              Método de Pago
+                            </h2>
+                            <span className="bg-primary/20 text-primary text-[10px] font-mono font-bold px-2 py-0.5 rounded border border-primary/30 uppercase">
+                              Stripe Secure
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-[11px] text-gray-400 font-mono">
+                            <span className="material-symbols-outlined text-primary text-sm">lock</span>
+                            <span>SSL 256-Bit</span>
+                          </div>
+                        </div>
+                        
+                        <div className="bg-black/60 border border-primary/30 rounded-xl p-4 shadow-[0_0_20px_rgba(106,244,37,0.05)]">
+                          <PaymentElement options={{ layout: 'tabs' }} />
+                        </div>
+                      </div>
+
+                      <Button type="submit" size="lg" disabled={!stripe} className="w-full mt-4 py-4 text-sm font-black tracking-widest uppercase shadow-[0_0_20px_rgba(106,244,37,0.3)]">
+                        {lang === 'es' ? 'CONFIRMAR Y PAGAR CON STRIPE' : 'CONFIRM AND PAY WITH STRIPE'} (${total.toFixed(2)})
+                      </Button>
+                    </>
+                  )}
                 </form>
 
                 {/* Order Summary */}
@@ -612,6 +667,15 @@ const CheckoutContent = () => {
                         <span className={shipping === 0 ? "text-primary" : "text-gray-300"}>
                           {shipping === 0 ? t('cart.freeShipping') : `$${shipping.toFixed(2)}`}
                         </span>
+                      </div>
+
+                      <div className="flex justify-between text-xs text-gray-400 font-mono">
+                        <span>
+                          {form.state === 'TX' || form.state?.toUpperCase() === 'TEXAS'
+                            ? (lang === 'es' ? 'Impuesto de Venta (TX 8.25%)' : 'Sales Tax (TX 8.25%)')
+                            : (lang === 'es' ? 'Impuesto Estimado' : 'Estimated Tax')}
+                        </span>
+                        <span className="text-gray-300">${tax.toFixed(2)}</span>
                       </div>
 
                       <div className="flex justify-between text-lg pt-3 mt-2 border-t border-white/10 font-black italic uppercase">

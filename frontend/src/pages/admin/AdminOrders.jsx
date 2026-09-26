@@ -160,6 +160,7 @@ const AdminOrders = () => {
           <div class="section">
             <div class="row"><span>Subtotal:</span><span>$${subtotal.toFixed(2)}</span></div>
             ${discount > 0 ? `<div class="row"><span>Discount (${order.coupon_code || 'Coupon'}):</span><span>-$${discount.toFixed(2)}</span></div>` : ''}
+            ${parseFloat(order.tax) > 0 ? `<div class="row"><span>Tax (TX 8.25%):</span><span>$${parseFloat(order.tax).toFixed(2)}</span></div>` : ''}
             <div class="row"><span>Shipping:</span><span>$${shipping.toFixed(2)}</span></div>
             <div class="row bold" style="font-size: 0.95rem; margin-top: 5px;"><span>Total Paid:</span><span>$${total.toFixed(2)}</span></div>
             <div class="row" style="color: #444; margin-top: 3px;"><span>Entries Earned:</span><span>${order.entriesEarned || 0}</span></div>

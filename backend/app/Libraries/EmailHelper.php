@@ -114,6 +114,9 @@ HTML;
         $subtotal = number_format($order['subtotal'], 2);
         $shipping = number_format($order['shipping'], 2);
         $discount = number_format($order['discount'], 2);
+        $taxVal   = (float) ($order['tax'] ?? 0);
+        $taxFormatted = number_format($taxVal, 2);
+        $taxHtml  = ($taxVal > 0) ? "<tr><td style=\"padding: 5px 0; color: #aaa;\">Tax (TX 8.25%)</td><td style=\"padding: 5px 0; color: #fff; text-align: right;\">\${$taxFormatted}</td></tr>" : "";
         $total    = number_format($order['total'], 2);
 
         $html = <<<HTML
@@ -158,6 +161,7 @@ HTML;
                   <td style="padding: 5px 0; color: #aaa;">Subtotal</td>
                   <td style="padding: 5px 0; color: #fff; text-align: right;">\${$subtotal}</td>
                 </tr>
+                {$taxHtml}
                 <tr>
                   <td style="padding: 5px 0; color: #aaa;">Shipping</td>
                   <td style="padding: 5px 0; color: #fff; text-align: right;">\${$shipping}</td>

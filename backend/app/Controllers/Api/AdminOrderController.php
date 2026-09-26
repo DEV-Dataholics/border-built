@@ -28,6 +28,7 @@ class AdminOrderController extends ResourceController
             $order['subtotal'] = (float) ($order['subtotal'] ?? 0);
             $order['shipping'] = (float) ($order['shipping'] ?? 0);
             $order['discount'] = (float) ($order['discount'] ?? 0);
+            $order['tax'] = (float) ($order['tax'] ?? 0);
             $order['shippingStatus'] = !empty($order['status']) ? $order['status'] : 'pending';
             
             // Fetch items from order_items table
