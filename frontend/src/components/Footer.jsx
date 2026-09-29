@@ -64,6 +64,16 @@ const Footer = () => {
           >
             {isEs ? 'Evitar estafas' : 'Prevent scams'}
           </button>
+          <button 
+            type="button"
+            onClick={() => {
+              navigate('/about');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }} 
+            className="hover:text-primary transition-colors text-left cursor-pointer"
+          >
+            {isEs ? 'Acerca de nosotros' : 'About us'}
+          </button>
         </div>
 
         {/* Column 2: Legal */}
