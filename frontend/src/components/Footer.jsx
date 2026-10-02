@@ -31,17 +31,10 @@ const Footer = () => {
           </h4>
           <button 
             type="button"
-            onClick={() => openContact('support')} 
-            className="hover:text-primary transition-colors text-left cursor-pointer"
-          >
-            {isEs ? 'Centro de Ayuda / Contacto' : 'Help Center / Contact'}
-          </button>
-          <button 
-            type="button"
             onClick={() => openContact('mechanic')} 
             className="hover:text-primary transition-colors text-left cursor-pointer"
           >
-            {isEs ? 'Contacta a tu mecánico' : 'Contact your mechanic'}
+            {isEs ? 'Contacta a tu mecánico (Soporte)' : 'Contact your mechanic (Support)'}
           </button>
           <button 
             type="button"
