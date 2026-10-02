@@ -559,7 +559,7 @@ const Legal = () => {
                       : 'Our only official website for giveaways and merchandise is border-built.com. Always verify the address in your browser before entering sensitive information.'}
                   </p>
                   <p className="text-xs font-mono text-gray-400 mt-2">
-                    Email: support@border-built.com | Instagram: @borderbuilt | TikTok: @borderbuilt
+                    Email: support@border-built.com | Instagram: <a href="https://www.instagram.com/borderbuilt1/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">@borderbuilt1</a> | TikTok: @borderbuilt
                   </p>
                 </div>
 

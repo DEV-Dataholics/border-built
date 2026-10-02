@@ -132,7 +132,7 @@ const Footer = () => {
         <p>&copy; {new Date().getFullYear()} {isEs ? 'Border Built. Todos los derechos reservados.' : 'Border Built. All rights reserved.'}</p>
         <div className="flex gap-6">
           <a 
-            href="https://instagram.com/borderbuilt" 
+            href="https://www.instagram.com/borderbuilt1/" 
             target="_blank" 
             rel="noopener noreferrer" 
             className="hover:text-primary transition-colors flex items-center gap-1.5"
