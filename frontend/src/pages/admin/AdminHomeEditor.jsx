@@ -6,6 +6,7 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import PageTransition from '../../components/layout/PageTransition';
 import HomePreview from '../../components/admin/HomePreview';
+import ImageCropperModal from '../../components/admin/ImageCropperModal';
 
 const AdminHomeEditor = () => {
   const { id } = useParams();
@@ -101,17 +102,47 @@ const AdminHomeEditor = () => {
     }));
   };
 
-  // Image upload handler
-  const handleFileUpload = async (e, fieldName, blockIdx = null) => {
+  // Cropper modal state
+  const [cropperState, setCropperState] = useState({
+    isOpen: false,
+    imageSrc: null,
+    file: null,
+    fieldName: null,
+    blockIdx: null,
+    title: '',
+    defaultAspect: 16 / 9,
+  });
+
+  // Trigger file selection -> open cropper
+  const handleFileSelect = (e, fieldName, blockIdx = null) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Reset input value so re-selecting same file works
+    e.target.value = '';
+
+    const isHero = fieldName === 'heroImage' && blockIdx === null;
+    const objectUrl = URL.createObjectURL(file);
+
+    setCropperState({
+      isOpen: true,
+      imageSrc: objectUrl,
+      file,
+      fieldName,
+      blockIdx,
+      title: isHero ? 'Imagen de Fondo (Hero Banner)' : `Imagen de Bloque ${blockIdx !== null ? blockIdx + 1 : ''}`,
+      defaultAspect: 16 / 9,
+    });
+  };
+
+  // Backend image upload executor
+  const executeUpload = async (fileToUpload, fieldName, blockIdx = null) => {
     const uploadKey = blockIdx !== null ? `block_${blockIdx}` : fieldName;
     setUploadingField(uploadKey);
 
     try {
       const data = new FormData();
-      data.append('image', file);
+      data.append('image', fileToUpload);
 
       const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/giveaways/${id}/upload`, {
         method: 'POST',
@@ -134,6 +165,25 @@ const AdminHomeEditor = () => {
     } finally {
       setUploadingField(null);
     }
+  };
+
+  const handleCroppedUpload = async (croppedBlob, croppedFile) => {
+    const { fieldName, blockIdx, imageSrc } = cropperState;
+    if (imageSrc) URL.revokeObjectURL(imageSrc);
+    setCropperState((prev) => ({ ...prev, isOpen: false, imageSrc: null }));
+    await executeUpload(croppedFile, fieldName, blockIdx);
+  };
+
+  const handleUploadOriginal = async () => {
+    const { file, fieldName, blockIdx, imageSrc } = cropperState;
+    if (imageSrc) URL.revokeObjectURL(imageSrc);
+    setCropperState((prev) => ({ ...prev, isOpen: false, imageSrc: null }));
+    await executeUpload(file, fieldName, blockIdx);
+  };
+
+  const handleCloseCropper = () => {
+    if (cropperState.imageSrc) URL.revokeObjectURL(cropperState.imageSrc);
+    setCropperState((prev) => ({ ...prev, isOpen: false, imageSrc: null }));
   };
 
   // Breakdown blocks logic (CRUD + reorder)
@@ -306,7 +356,7 @@ const AdminHomeEditor = () => {
                       type="file"
                       accept="image/*"
                       className="hidden"
-                      onChange={(e) => handleFileUpload(e, 'heroImage')}
+                      onChange={(e) => handleFileSelect(e, 'heroImage')}
                     />
                   </label>
                 </div>
@@ -604,7 +654,7 @@ const AdminHomeEditor = () => {
                               type="file"
                               accept="image/*"
                               className="hidden"
-                              onChange={(e) => handleFileUpload(e, 'image_url', idx)}
+                              onChange={(e) => handleFileSelect(e, 'image_url', idx)}
                             />
                           </label>
                         </div>
@@ -630,6 +680,18 @@ const AdminHomeEditor = () => {
           <HomePreview formData={formData} />
         </div>
       </div>
+
+      {/* Image Cropper Modal */}
+      <ImageCropperModal
+        isOpen={cropperState.isOpen}
+        imageSrc={cropperState.imageSrc}
+        fileName={cropperState.file?.name}
+        title={cropperState.title}
+        defaultAspect={cropperState.defaultAspect}
+        onCropConfirm={handleCroppedUpload}
+        onUploadOriginal={handleUploadOriginal}
+        onClose={handleCloseCropper}
+      />
     </PageTransition>
   );
 };
