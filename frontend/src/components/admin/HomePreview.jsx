@@ -3,11 +3,16 @@ import React from 'react';
 // Auxiliar component for detailed car feature breakdown
 const Feature = ({ title, desc, img, reverse }) => (
   <div className={`flex flex-col ${reverse ? 'md:flex-row-reverse' : 'md:flex-row'} gap-4 items-center py-4 border-b border-white/5 last:border-0`}>
-    <div className="w-full md:w-1/2 aspect-video rounded-sm overflow-hidden border border-white/10 relative shrink-0">
+    <div className="w-full md:w-1/2 aspect-video rounded-sm overflow-hidden border border-white/10 relative shrink-0 bg-[#080808] flex items-center justify-center">
       <div
-        className="w-full h-full bg-cover bg-center"
+        className="absolute inset-0 bg-cover bg-center blur-md opacity-35 scale-110 pointer-events-none"
         style={{ backgroundImage: `url('${img || '/images/nissan-350z-tokyo-garage.png'}')` }}
       ></div>
+      <img
+        src={img || '/images/nissan-350z-tokyo-garage.png'}
+        alt={title || 'Build Highlight'}
+        className="w-full h-full object-contain relative z-10"
+      />
     </div>
     <div className="w-full md:w-1/2 flex flex-col gap-1 text-left min-w-0">
       <h3 className="text-sm md:text-base font-black italic uppercase text-white leading-tight break-words [overflow-wrap:anywhere]">

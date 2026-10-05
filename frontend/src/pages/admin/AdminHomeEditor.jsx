@@ -658,6 +658,12 @@ const AdminHomeEditor = () => {
                             />
                           </label>
                         </div>
+                        {block.image_url && (
+                          <div className="w-full h-24 rounded border border-white/10 bg-[#080808] flex items-center justify-center overflow-hidden mt-1 relative">
+                            <div className="absolute inset-0 bg-cover bg-center blur-sm opacity-25" style={{ backgroundImage: `url('${block.image_url}')` }} />
+                            <img src={block.image_url} alt="" className="h-full object-contain relative z-10" />
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}

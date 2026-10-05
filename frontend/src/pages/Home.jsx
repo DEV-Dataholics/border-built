@@ -11,12 +11,17 @@ import PageTransition from '../components/layout/PageTransition';
 // Auxiliar component for detailed car feature breakdown
 const Feature = ({ title, desc, img, reverse, lang }) => (
   <div className={`flex flex-col ${reverse ? 'md:flex-row-reverse' : 'md:flex-row'} gap-6 items-center py-8 border-b border-white/5 last:border-0`}>
-    <div className="w-full md:w-1/2 aspect-video rounded-sm overflow-hidden shadow-[0_0_20px_rgba(0,0,0,0.5)] border border-white/10 group relative shrink-0">
-      <div className="absolute inset-0 bg-primary/20 mix-blend-overlay opacity-0 group-hover:opacity-100 transition-opacity"></div>
+    <div className="w-full md:w-1/2 aspect-video rounded-sm overflow-hidden shadow-[0_0_20px_rgba(0,0,0,0.5)] border border-white/10 group relative shrink-0 bg-[#080808] flex items-center justify-center">
+      <div className="absolute inset-0 bg-primary/20 mix-blend-overlay opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none"></div>
       <div
-        className="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+        className="absolute inset-0 bg-cover bg-center blur-md opacity-35 scale-110 pointer-events-none"
         style={{ backgroundImage: `url('${img || '/images/products/placeholder.webp'}')` }}
       ></div>
+      <img
+        src={img || '/images/products/placeholder.webp'}
+        alt={title || 'Build Highlight'}
+        className="w-full h-full object-contain relative z-10 transition-transform duration-700 group-hover:scale-105"
+      />
     </div>
     <div className="w-full md:w-1/2 flex flex-col gap-2 text-left min-w-0">
       <h3 className="text-xl md:text-2xl font-black italic uppercase text-white leading-tight break-words [overflow-wrap:anywhere]">
