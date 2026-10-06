@@ -6,6 +6,7 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import PageTransition from '../../components/layout/PageTransition';
 import Tooltip from '../../components/ui/Tooltip';
+import CategoryManagerModal from '../../components/admin/CategoryManagerModal';
 
 const AdminProducts = () => {
   const navigate = useNavigate();
@@ -15,6 +16,30 @@ const AdminProducts = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+
+  const [categories, setCategories] = useState([
+    { key: 'hoodies', name_en: 'Hoodies', name_es: 'Hoodies' },
+    { key: 'tshirts', name_en: 'T-Shirts', name_es: 'Playeras' },
+    { key: 'hats', name_en: 'Hats', name_es: 'Gorras' },
+    { key: 'accessories', name_en: 'Accessories', name_es: 'Accesorios' },
+    { key: 'mystery', name_en: 'Mystery Boxes', name_es: 'Cajas Misteriosas' },
+    { key: 'quick_entries', name_en: 'Quick Entries', name_es: 'Entradas Rápidas' }
+  ]);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/categories`);
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setCategories(data);
+        }
+      }
+    } catch (err) {
+      console.warn('Error fetching categories:', err);
+    }
+  };
 
   const defaultForm = {
     name: '',
@@ -59,6 +84,7 @@ const AdminProducts = () => {
       return;
     }
     fetchProducts();
+    fetchCategories();
   }, [isAdmin, navigate]);
 
   const handleChange = (e) => {
@@ -443,20 +469,30 @@ const AdminProducts = () => {
                   placeholder="Optional"
                 />
                 <div>
-                  <label className="block text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-2">
-                    Category
-                  </label>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                      Category
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowCategoryModal(true)}
+                      className="text-[10px] text-primary hover:underline font-mono flex items-center gap-1 cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-xs">settings</span>
+                      Editar Categorías
+                    </button>
+                  </div>
                   <select
                     name="category"
                     value={formData.category}
                     onChange={handleChange}
-                    className="w-full bg-[#151515] border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-primary/50 font-mono text-sm"
+                    className="w-full bg-[#151515] border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-primary/50 font-mono text-sm uppercase"
                   >
-                    <option value="hoodies">HOODIES</option>
-                    <option value="tshirts">T-SHIRTS</option>
-                    <option value="accessories">ACCESSORIES</option>
-                    <option value="mystery">MYSTERY BOX</option>
-                    <option value="quick_entries">QUICK ENTRIES</option>
+                    {categories.map((cat) => (
+                      <option key={cat.key} value={cat.key}>
+                        {cat.name_en || cat.key} ({cat.key})
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <Input
@@ -672,6 +708,14 @@ const AdminProducts = () => {
           </div>
         </div>
       )}
+
+      {/* Category Manager Modal */}
+      <CategoryManagerModal
+        isOpen={showCategoryModal}
+        onClose={() => setShowCategoryModal(false)}
+        initialCategories={categories}
+        onCategoriesUpdated={(updated) => setCategories(updated)}
+      />
     </PageTransition>
   );
 };

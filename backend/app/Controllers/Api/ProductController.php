@@ -113,4 +113,33 @@ class ProductController extends ResourceController
             'similar' => $similar
         ]);
     }
+
+    public function options()
+    {
+        return $this->response->setStatusCode(200);
+    }
+
+    public function categories()
+    {
+        $db = \Config\Database::connect();
+        $cfgRow = $db->table('configs')->where('key', 'product_categories')->get()->getRowArray();
+
+        $defaultCategories = [
+            ['key' => 'hoodies', 'name_en' => 'Hoodies', 'name_es' => 'Hoodies'],
+            ['key' => 'tshirts', 'name_en' => 'T-Shirts', 'name_es' => 'Playeras'],
+            ['key' => 'hats', 'name_en' => 'Hats', 'name_es' => 'Gorras'],
+            ['key' => 'accessories', 'name_en' => 'Accessories', 'name_es' => 'Accesorios'],
+            ['key' => 'mystery', 'name_en' => 'Mystery Boxes', 'name_es' => 'Cajas Misteriosas'],
+            ['key' => 'quick_entries', 'name_en' => 'Quick Entries', 'name_es' => 'Entradas Rápidas'],
+        ];
+
+        if ($cfgRow && !empty($cfgRow['value'])) {
+            $saved = json_decode($cfgRow['value'], true);
+            if (is_array($saved) && count($saved) > 0) {
+                return $this->respond($saved);
+            }
+        }
+
+        return $this->respond($defaultCategories);
+    }
 }

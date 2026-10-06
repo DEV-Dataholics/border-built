@@ -15,6 +15,44 @@ const AdminDashboard = () => {
   const [range, setRange] = useState('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [checkoutEnabled, setCheckoutEnabled] = useState(true);
+  const [togglingCheckout, setTogglingCheckout] = useState(false);
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL}/checkout-status`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data && typeof data.checkoutEnabled === 'boolean') {
+          setCheckoutEnabled(data.checkoutEnabled);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleToggleCheckout = async () => {
+    const actionText = checkoutEnabled ? 'pausar temporalmente los pagos en línea' : 'habilitar y activar los pagos de la tienda';
+    if (!window.confirm(`¿Estás seguro de que deseas ${actionText}?`)) return;
+
+    setTogglingCheckout(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/checkout-status/toggle`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+        },
+        body: JSON.stringify({ enabled: !checkoutEnabled })
+      });
+      const data = await res.json();
+      if (data && typeof data.checkoutEnabled === 'boolean') {
+        setCheckoutEnabled(data.checkoutEnabled);
+      }
+    } catch (err) {
+      alert('Error al actualizar el estado del checkout');
+    } finally {
+      setTogglingCheckout(false);
+    }
+  };
 
   useEffect(() => {
     if (!isAdmin()) {
@@ -104,6 +142,40 @@ const AdminDashboard = () => {
               <option value="custom" className="bg-[#121212]">{t('admin.customRange')}</option>
             </select>
           </div>
+        </div>
+
+                {/* Checkout Gateway Status Control */}
+        <div className={`mb-8 p-4 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-black/80 via-[#111] to-black/80 transition-all ${checkoutEnabled ? 'border-primary/40 shadow-[0_0_25px_rgba(106,244,37,0.08)]' : 'border-amber-500/40 shadow-[0_0_25px_rgba(245,158,11,0.08)]'}`}>
+          <div className="flex items-center gap-3.5">
+            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border ${checkoutEnabled ? 'bg-primary/10 border-primary/40 text-primary' : 'bg-amber-500/10 border-amber-500/40 text-amber-400'}`}>
+              <span className="material-symbols-outlined text-2xl">{checkoutEnabled ? 'shopping_cart_checkout' : 'pause_circle'}</span>
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-xs font-mono font-bold uppercase text-white tracking-wider">
+                  Pasarela de Pago de la Tienda
+                </span>
+                <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full uppercase border ${checkoutEnabled ? 'bg-primary/20 text-primary border-primary/40' : 'bg-amber-500/20 text-amber-400 border-amber-500/40'}`}>
+                  {checkoutEnabled ? '● Activo / Pagos Habilitados' : '⏸ En Pausa / Modo Espera'}
+                </span>
+              </div>
+              <p className="text-[11px] text-gray-400 font-sans">
+                {checkoutEnabled
+                  ? 'Los usuarios pueden pagar y completar sus órdenes en línea con Stripe normalmente.'
+                  : 'Los usuarios pueden ver productos y armar carrito, pero el pago con Stripe está bloqueado preventivamente.'}
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            disabled={togglingCheckout}
+            onClick={handleToggleCheckout}
+            className={`px-4 py-2.5 rounded-lg font-mono text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 shadow-md cursor-pointer ${checkoutEnabled ? 'bg-amber-500/15 border border-amber-500/40 text-amber-400 hover:bg-amber-500/25' : 'bg-primary text-black hover:bg-primary/90 shadow-primary/20'}`}
+          >
+            <span className="material-symbols-outlined text-sm">{checkoutEnabled ? 'pause' : 'play_arrow'}</span>
+            {togglingCheckout ? 'Actualizando...' : (checkoutEnabled ? 'Pausar Pagos' : 'Habilitar Tienda')}
+          </button>
         </div>
 
         {/* Stats Grid - Dynamic Responsive Cards */}

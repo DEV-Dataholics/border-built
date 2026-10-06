@@ -55,4 +55,27 @@ class AdminConfigController extends ResourceController
 
         return $this->respond(['status' => 'success']);
     }
+
+    public function toggleCheckout()
+    {
+        $db = \Config\Database::connect();
+        $json = $this->request->getJSON(true);
+        
+        $cfgRow = $db->table('configs')->where('key', 'checkout_enabled')->get()->getRowArray();
+        $current = ($cfgRow && $cfgRow['value'] === 'true');
+        $newStatus = isset($json['enabled']) ? (bool) $json['enabled'] : !$current;
+        $val = $newStatus ? 'true' : 'false';
+
+        if ($cfgRow) {
+            $db->table('configs')->where('key', 'checkout_enabled')->update(['value' => $val]);
+        } else {
+            $db->table('configs')->insert(['key' => 'checkout_enabled', 'value' => $val]);
+        }
+
+        return $this->respond([
+            'status' => 'success',
+            'checkoutEnabled' => $newStatus,
+            'message' => $newStatus ? 'Checkout re-enabled successfully' : 'Checkout paused'
+        ]);
+    }
 }

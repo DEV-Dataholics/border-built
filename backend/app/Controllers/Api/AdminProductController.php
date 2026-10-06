@@ -226,4 +226,48 @@ class AdminProductController extends ResourceController
         $model->delete($id);
         return $this->respondDeleted(['id' => $id]);
     }
+
+    public function getCategories()
+    {
+        $db = \Config\Database::connect();
+        $cfgRow = $db->table('configs')->where('key', 'product_categories')->get()->getRowArray();
+        
+        $defaultCategories = [
+            ['key' => 'hoodies', 'name_en' => 'Hoodies', 'name_es' => 'Hoodies'],
+            ['key' => 'tshirts', 'name_en' => 'T-Shirts', 'name_es' => 'Playeras'],
+            ['key' => 'hats', 'name_en' => 'Hats', 'name_es' => 'Gorras'],
+            ['key' => 'accessories', 'name_en' => 'Accessories', 'name_es' => 'Accesorios'],
+            ['key' => 'mystery', 'name_en' => 'Mystery Boxes', 'name_es' => 'Cajas Misteriosas'],
+            ['key' => 'quick_entries', 'name_en' => 'Quick Entries', 'name_es' => 'Entradas Rápidas'],
+        ];
+
+        if ($cfgRow && !empty($cfgRow['value'])) {
+            $saved = json_decode($cfgRow['value'], true);
+            if (is_array($saved) && count($saved) > 0) {
+                return $this->respond($saved);
+            }
+        }
+        return $this->respond($defaultCategories);
+    }
+
+    public function updateCategories()
+    {
+        $db = \Config\Database::connect();
+        $json = $this->request->getJSON(true);
+        $categories = $json['categories'] ?? $json;
+
+        if (!is_array($categories)) {
+            return $this->fail('Invalid categories data', 400);
+        }
+
+        $val = json_encode(array_values($categories), JSON_UNESCAPED_UNICODE);
+        $exists = $db->table('configs')->where('key', 'product_categories')->get()->getRowArray();
+        if ($exists) {
+            $db->table('configs')->where('key', 'product_categories')->update(['value' => $val]);
+        } else {
+            $db->table('configs')->insert(['key' => 'product_categories', 'value' => $val]);
+        }
+
+        return $this->respond(['status' => 'success', 'categories' => $categories]);
+    }
 }

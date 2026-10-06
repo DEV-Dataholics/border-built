@@ -39,20 +39,49 @@ const Shop = () => {
     fetchProducts();
   }, []);
 
-  const baseCategories = [
-    { key: 'all', label: t('shop.allCategories') },
-    { key: 'featured', label: t('shop.bestSellers') },
-    { key: 'hoodies', label: t('shop.hoodies') },
-    { key: 'tshirts', label: t('shop.tshirts') },
-    { key: 'accessories', label: t('shop.accessories') },
-    { key: 'mystery', label: t('shop.mystery') },
-  ];
+  const [dbCategories, setDbCategories] = useState([
+    { key: 'hoodies', name_en: 'Hoodies', name_es: 'Hoodies' },
+    { key: 'tshirts', name_en: 'T-Shirts', name_es: 'Playeras' },
+    { key: 'hats', name_en: 'Hats', name_es: 'Gorras' },
+    { key: 'accessories', name_en: 'Accessories', name_es: 'Accesorios' },
+    { key: 'mystery', name_en: 'Mystery Boxes', name_es: 'Cajas Misteriosas' },
+  ]);
 
-  const categories = baseCategories.filter(cat => {
-    if (cat.key === 'all') return true;
-    if (cat.key === 'featured') return products.some(p => p.featured);
-    return products.some(p => p.category === cat.key);
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL}/categories`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setDbCategories(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Ensure any category found on existing products is also covered
+  const productCatKeys = [...new Set(products.map(p => p.category).filter(Boolean))];
+  const dynamicCategories = [...dbCategories];
+  productCatKeys.forEach(catKey => {
+    if (catKey !== 'quick_entries' && !dynamicCategories.some(c => c.key === catKey)) {
+      dynamicCategories.push({
+        key: catKey,
+        name_en: catKey.charAt(0).toUpperCase() + catKey.slice(1),
+        name_es: catKey.charAt(0).toUpperCase() + catKey.slice(1)
+      });
+    }
   });
+
+  const categories = [
+    { key: 'all', label: t('shop.allCategories') },
+    ...(products.some(p => p.featured) ? [{ key: 'featured', label: t('shop.bestSellers') }] : []),
+    ...dynamicCategories
+      .filter(cat => cat.key !== 'quick_entries')
+      .map(cat => ({
+        key: cat.key,
+        label: lang === 'es' ? (cat.name_es || cat.name_en || cat.key) : (cat.name_en || cat.key)
+      }))
+      .filter(cat => products.some(p => p.category === cat.key))
+  ];
 
   const filteredProducts = activeCategory === 'all'
     ? products

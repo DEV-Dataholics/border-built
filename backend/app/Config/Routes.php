@@ -57,9 +57,49 @@ $routes->group('api', ['namespace' => 'App\\Controllers\\Api'], static function 
         }
     });
 
+    $routes->get('setup_shop', function() {
+        $db = \Config\Database::connect();
+        
+        // 1. Re-enable checkout
+        $cfg = $db->table('configs')->where('key', 'checkout_enabled')->get()->getRowArray();
+        if ($cfg) {
+            $db->table('configs')->where('key', 'checkout_enabled')->update(['value' => 'true']);
+        } else {
+            $db->table('configs')->insert(['key' => 'checkout_enabled', 'value' => 'true']);
+        }
+
+        // 2. Setup categories config
+        $catCfg = $db->table('configs')->where('key', 'product_categories')->get()->getRowArray();
+        $defaultCategories = [
+            ['key' => 'hoodies', 'name_en' => 'Hoodies', 'name_es' => 'Hoodies'],
+            ['key' => 'tshirts', 'name_en' => 'T-Shirts', 'name_es' => 'Playeras'],
+            ['key' => 'hats', 'name_en' => 'Hats', 'name_es' => 'Gorras'],
+            ['key' => 'accessories', 'name_en' => 'Accessories', 'name_es' => 'Accesorios'],
+            ['key' => 'mystery', 'name_en' => 'Mystery Boxes', 'name_es' => 'Cajas Misteriosas'],
+            ['key' => 'quick_entries', 'name_en' => 'Quick Entries', 'name_es' => 'Entradas Rápidas'],
+        ];
+        if (!$catCfg) {
+            $db->table('configs')->insert([
+                'key' => 'product_categories',
+                'value' => json_encode($defaultCategories, JSON_UNESCAPED_UNICODE)
+            ]);
+        }
+
+        // 3. Move all hats to 'hats' category
+        $db->query("UPDATE products SET category = 'hats' WHERE id IN ('prod_002', 'prod_003', 'prod_004', 'prod_e4fdba42') OR name LIKE '%HAT%' OR name LIKE '%Snapback%' OR name LIKE '%Gorra%'");
+
+        return json_encode([
+            'status' => 'success',
+            'checkout_enabled' => true,
+            'hats_updated' => true
+        ]);
+    });
+
     $routes->get('alter-db', 'ProductController::alterDb');
     $routes->get('products', 'ProductController::index');
     $routes->get('products/(:segment)', 'ProductController::show/$1');
+    $routes->get('categories', 'ProductController::categories');
+    $routes->options('categories', 'ProductController::options');
     $routes->get('users/(:segment)', 'UserController::show/$1');
     $routes->get('giveaways/active', 'GiveawayController::getActive');
     $routes->get('checkout-status', 'OrderController::checkoutStatus');
@@ -138,6 +178,13 @@ $routes->group('api', ['namespace' => 'App\\Controllers\\Api'], static function 
         $routes->options('giveaways/(:segment)/upload', 'AdminGiveawayController::options');
 
         $routes->get('reports', 'AdminReportController::index');
+
+        $routes->get('categories', 'AdminProductController::getCategories');
+        $routes->put('categories', 'AdminProductController::updateCategories');
+        $routes->options('categories', 'AdminProductController::options');
+
+        $routes->post('checkout-status/toggle', 'AdminConfigController::toggleCheckout');
+        $routes->options('checkout-status/toggle', 'AdminConfigController::options');
 
         $routes->get('config', 'AdminConfigController::index');
         $routes->put('config', 'AdminConfigController::updateConfigs');
