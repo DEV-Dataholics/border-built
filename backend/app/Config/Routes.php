@@ -95,17 +95,20 @@ $routes->group('api', ['namespace' => 'App\\Controllers\\Api'], static function 
         ]);
     });
 
-        $routes->get('setup_winners_instagram', function() {
+    $routes->get('setup_winners_instagram', function() {
         $db = \Config\Database::connect();
         $fields = $db->getFieldNames('winners');
-        $added = false;
+        $error = null;
         if (!in_array('instagram', $fields)) {
-            $db->query("ALTER TABLE winners ADD COLUMN instagram VARCHAR(255) NULL AFTER badge_es");
-            $added = true;
+            try {
+                $db->query("ALTER TABLE winners ADD COLUMN instagram VARCHAR(255) NULL");
+            } catch (\Throwable $e) {
+                $error = $e->getMessage();
+            }
         }
         return json_encode([
             'status' => 'success',
-            'added' => $added,
+            'error' => $error,
             'fields' => $db->getFieldNames('winners')
         ]);
     });
