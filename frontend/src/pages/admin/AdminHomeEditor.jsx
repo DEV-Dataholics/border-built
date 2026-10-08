@@ -6,6 +6,7 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import PageTransition from '../../components/layout/PageTransition';
 import HomePreview from '../../components/admin/HomePreview';
+import { getEmbedVideoInfo } from '../../components/features/PromoVideoSection';
 import ImageCropperModal from '../../components/admin/ImageCropperModal';
 
 const AdminHomeEditor = () => {
@@ -43,6 +44,11 @@ const AdminHomeEditor = () => {
     prizeCost: 50000,
     endDate: '',
     breakdownBlocks: [],
+    videoEnabled: false,
+    videoPosition: 'below_countdown',
+    videoUrl: '',
+    videoTitle: '',
+    videoTitleEs: '',
   });
 
   // Accordion state
@@ -83,6 +89,11 @@ const AdminHomeEditor = () => {
           prizeCost: data.prize_cost || 50000,
           endDate: data.end_date && !data.end_date.startsWith('0000') ? data.end_date.replace(' ', 'T').slice(0, 16) : '',
           breakdownBlocks: data.breakdown_blocks || [],
+          videoEnabled: data.video_enabled === 1 || data.video_enabled === true || data.video_enabled === '1' || data.video_enabled === 'true',
+          videoPosition: data.video_position || 'below_countdown',
+          videoUrl: data.video_url || '',
+          videoTitle: data.video_title || '',
+          videoTitleEs: data.video_title_es || '',
         });
       } catch (error) {
         console.error('Error fetching giveaway:', error);
@@ -311,9 +322,10 @@ const AdminHomeEditor = () => {
           <div className="flex flex-wrap gap-2 border-b border-white/10 pb-3">
             {[
               { id: 'hero', label: '1. Hero Section', icon: 'view_carousel' },
-              { id: 'specs', label: '2. Ficha Técnica', icon: 'tune' },
-              { id: 'scarcity', label: '3. Escasez Banner', icon: 'bolt' },
-              { id: 'breakdown', label: `4. Desglose (${formData.breakdownBlocks.length})`, icon: 'list_alt' },
+              { id: 'video', label: '2. Video Promo', icon: 'smart_display' },
+              { id: 'specs', label: '3. Ficha Técnica', icon: 'tune' },
+              { id: 'scarcity', label: '4. Escasez Banner', icon: 'bolt' },
+              { id: 'breakdown', label: `5. Desglose (${formData.breakdownBlocks.length})`, icon: 'list_alt' },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -463,7 +475,145 @@ const AdminHomeEditor = () => {
             </div>
           )}
 
-          {/* 2. FICHA TÉCNICA ACCORDION */}
+          {/* 2. VIDEO PROMO ACCORDION */}
+          {activeSection === 'video' && (
+            <div className="bg-white/5 border border-white/10 p-5 rounded-xl flex flex-col gap-5 animate-fadeIn">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <h2 className="text-sm font-bold uppercase font-mono text-primary flex items-center gap-2">
+                  <span className="material-symbols-outlined text-base">smart_display</span>
+                  Video Promocional en el Home
+                </h2>
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={formData.videoEnabled}
+                    onChange={(e) => setFormData({ ...formData, videoEnabled: e.target.checked })}
+                    className="w-4 h-4 accent-primary rounded cursor-pointer"
+                  />
+                  <span className={`text-xs font-mono font-bold uppercase px-2 py-0.5 rounded ${formData.videoEnabled ? 'bg-primary/20 text-primary border border-primary/40' : 'bg-gray-800 text-gray-400 border border-white/10'}`}>
+                    {formData.videoEnabled ? '● Video Activo' : '○ Desactivado'}
+                  </span>
+                </label>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-mono uppercase text-gray-300 font-bold">
+                  Ubicación del Video en la Página
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, videoPosition: 'above_countdown' })}
+                    className={`p-3 rounded-lg border text-left transition-all flex items-start gap-3 cursor-pointer ${
+                      formData.videoPosition === 'above_countdown'
+                        ? 'border-primary bg-primary/10 shadow-[0_0_15px_rgba(106,244,37,0.15)]'
+                        : 'border-white/10 bg-white/5 hover:border-white/25'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-primary text-xl mt-0.5">vertical_align_top</span>
+                    <div>
+                      <span className="text-xs font-mono font-bold block text-white uppercase">Arriba del Contador</span>
+                      <span className="text-[11px] font-sans text-gray-400 block mt-0.5">Se muestra entre la sección Hero y el contador regresivo.</span>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, videoPosition: 'below_countdown' })}
+                    className={`p-3 rounded-lg border text-left transition-all flex items-start gap-3 cursor-pointer ${
+                      formData.videoPosition === 'below_countdown'
+                        ? 'border-primary bg-primary/10 shadow-[0_0_15px_rgba(106,244,37,0.15)]'
+                        : 'border-white/10 bg-white/5 hover:border-white/25'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-primary text-xl mt-0.5">vertical_align_bottom</span>
+                    <div>
+                      <span className="text-xs font-mono font-bold block text-white uppercase">Abajo del Contador</span>
+                      <span className="text-[11px] font-sans text-gray-400 block mt-0.5">Se muestra entre el contador regresivo y la ficha técnica.</span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-mono uppercase text-gray-300 font-bold">
+                    URL / Enlace del Video
+                  </label>
+                  <span className="text-[10px] font-mono text-gray-500">YouTube, Vimeo o MP4</span>
+                </div>
+                <Input
+                  name="videoUrl"
+                  value={formData.videoUrl}
+                  onChange={handleChange}
+                  placeholder="https://www.youtube.com/watch?v=... o https://youtu.be/... o https://vimeo.com/..."
+                />
+                <p className="text-[11px] font-sans text-gray-400">
+                  Pega cualquier enlace público de YouTube (incluyendo shorts), Vimeo o un archivo directo en formato .mp4/.webm.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-mono uppercase text-gray-400">Título del Video (Inglés / General)</label>
+                  <Input
+                    name="videoTitle"
+                    value={formData.videoTitle}
+                    onChange={handleChange}
+                    placeholder="Ej: FAST & FURIOUS 350Z // OFFICIAL BUILD TEASER"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-mono uppercase text-gray-400">Título del Video (Español)</label>
+                  <Input
+                    name="videoTitleEs"
+                    value={formData.videoTitleEs}
+                    onChange={handleChange}
+                    placeholder="Ej: VIDEO OFICIAL // PROYECTO 350Z"
+                  />
+                </div>
+              </div>
+
+              {/* Vista Previa Interactiva dentro del Editor */}
+              {formData.videoUrl && (
+                <div className="border-t border-white/10 pt-4 flex flex-col gap-2">
+                  <span className="text-xs font-mono uppercase text-primary font-bold flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-sm">visibility</span>
+                    Vista Previa del Reproductor
+                  </span>
+                  <div className="w-full aspect-video rounded-xl overflow-hidden bg-black border border-white/20 shadow-lg">
+                    {(() => {
+                      const vInfo = getEmbedVideoInfo(formData.videoUrl);
+                      if (!vInfo) {
+                        return (
+                          <div className="w-full h-full flex flex-col items-center justify-center text-gray-500 font-mono text-xs p-4 text-center">
+                            <span className="material-symbols-outlined text-2xl mb-1 text-amber-400">warning</span>
+                            URL no reconocida. Asegúrate de incluir https://www.youtube.com/... o https://youtu.be/...
+                          </div>
+                        );
+                      }
+                      if (vInfo.type === 'direct') {
+                        return (
+                          <video src={vInfo.videoUrl} controls playsInline className="w-full h-full object-cover" />
+                        );
+                      }
+                      return (
+                        <iframe
+                          src={vInfo.embedUrl}
+                          title="Preview"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          className="w-full h-full border-0"
+                        />
+                      );
+                    })()}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 3. FICHA TÉCNICA ACCORDION */}
           {activeSection === 'specs' && (
             <div className="bg-white/5 border border-white/10 p-5 rounded-xl flex flex-col gap-4 animate-fadeIn">
               <h2 className="text-sm font-bold uppercase font-mono text-primary flex items-center gap-2 border-b border-white/10 pb-3">

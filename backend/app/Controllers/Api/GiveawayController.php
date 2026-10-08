@@ -41,6 +41,11 @@ class GiveawayController extends ResourceController
         // Cast types for Home CMS fields
         $activeGiveaway['prize_cost'] = (float) ($activeGiveaway['prize_cost'] ?? 0);
         $activeGiveaway['scarcity_percent_sold'] = (int) ($activeGiveaway['scarcity_percent_sold'] ?? 85);
+        $activeGiveaway['video_enabled'] = (bool) ($activeGiveaway['video_enabled'] ?? false);
+        $activeGiveaway['video_position'] = $activeGiveaway['video_position'] ?? 'below_countdown';
+        $activeGiveaway['video_url'] = $activeGiveaway['video_url'] ?? '';
+        $activeGiveaway['video_title'] = $activeGiveaway['video_title'] ?? '';
+        $activeGiveaway['video_title_es'] = $activeGiveaway['video_title_es'] ?? '';
         
         // Decode breakdown_blocks JSON
         if (!empty($activeGiveaway['breakdown_blocks']) && is_string($activeGiveaway['breakdown_blocks'])) {

@@ -58,6 +58,12 @@ class GiveawayModel extends Model
         'scarcity_subheadline_es',
         'scarcity_product_title_es',
         'scarcity_product_desc_es',
+        // Home CMS: Promo Video
+        'video_url',
+        'video_position',
+        'video_title',
+        'video_title_es',
+        'video_enabled',
     ];
 
     protected $useTimestamps = true;

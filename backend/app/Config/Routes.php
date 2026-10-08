@@ -113,6 +113,39 @@ $routes->group('api', ['namespace' => 'App\\Controllers\\Api'], static function 
         ]);
     });
 
+    $routes->get('setup_giveaway_video', function() {
+        $db = \Config\Database::connect();
+        $fields = $db->getFieldNames('giveaways');
+        $added = [];
+        
+        if (!in_array('video_url', $fields)) {
+            $db->query("ALTER TABLE giveaways ADD `video_url` VARCHAR(500) NULL");
+            $added[] = 'video_url';
+        }
+        if (!in_array('video_position', $fields)) {
+            $db->query("ALTER TABLE giveaways ADD `video_position` VARCHAR(50) DEFAULT 'below_countdown'");
+            $added[] = 'video_position';
+        }
+        if (!in_array('video_title', $fields)) {
+            $db->query("ALTER TABLE giveaways ADD `video_title` VARCHAR(255) NULL");
+            $added[] = 'video_title';
+        }
+        if (!in_array('video_title_es', $fields)) {
+            $db->query("ALTER TABLE giveaways ADD `video_title_es` VARCHAR(255) NULL");
+            $added[] = 'video_title_es';
+        }
+        if (!in_array('video_enabled', $fields)) {
+            $db->query("ALTER TABLE giveaways ADD `video_enabled` TINYINT(1) DEFAULT 0");
+            $added[] = 'video_enabled';
+        }
+
+        return json_encode([
+            'status' => 'success',
+            'added' => $added,
+            'fields' => $db->getFieldNames('giveaways')
+        ]);
+    });
+
     $routes->get('alter-db', 'ProductController::alterDb');
     $routes->get('products', 'ProductController::index');
     $routes->get('products/(:segment)', 'ProductController::show/$1');

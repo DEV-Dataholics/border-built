@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import CountdownTimer from '../components/CountdownTimer';
+import PromoVideoSection from '../components/features/PromoVideoSection';
 import ProgressBar from '../components/features/ProgressBar';
 import QuickEntriesSection from '../components/features/QuickEntriesSection';
 import { useGiveawayStore } from '../stores/useGiveawayStore';
@@ -111,6 +112,14 @@ const Home = () => {
     ? (activeGiveaway?.scarcity_product_desc_es || 'Merch exclusiva + 500 entradas')
     : (activeGiveaway?.scarcity_product_desc || 'Exclusive merch + 500 entries');
   const scarcityPercentSold = activeGiveaway?.scarcity_percent_sold ?? 85;
+
+  // Promo Video Configuration
+  const videoEnabled = activeGiveaway?.video_enabled === 1 || activeGiveaway?.video_enabled === true || activeGiveaway?.video_enabled === '1' || activeGiveaway?.video_enabled === 'true';
+  const videoUrl = activeGiveaway?.video_url || '';
+  const videoPosition = activeGiveaway?.video_position || 'below_countdown';
+  const videoTitle = activeGiveaway?.video_title || '';
+  const videoTitleEs = activeGiveaway?.video_title_es || '';
+  const shouldShowVideo = videoEnabled && !!videoUrl.trim();
 
   const specs = [
     { label: t('specs.makeModel'), value: `${carMake} ${carModel}` },
@@ -247,10 +256,30 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Promo Video (Above Countdown) */}
+      {shouldShowVideo && videoPosition === 'above_countdown' && (
+        <PromoVideoSection
+          videoUrl={videoUrl}
+          title={videoTitle}
+          titleEs={videoTitleEs}
+          lang={lang}
+        />
+      )}
+
       {/* Countdown Timer creating Urgency */}
       <div className="w-full bg-[#0a0a0a] border-b border-white/5 py-4">
         <CountdownTimer />
       </div>
+
+      {/* Promo Video (Below Countdown) */}
+      {shouldShowVideo && videoPosition === 'below_countdown' && (
+        <PromoVideoSection
+          videoUrl={videoUrl}
+          title={videoTitle}
+          titleEs={videoTitleEs}
+          lang={lang}
+        />
+      )}
 
       {/* Technical Spec Sheet Grid */}
       <div className="max-w-6xl mx-auto px-6 py-6 w-full">

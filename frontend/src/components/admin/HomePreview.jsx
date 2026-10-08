@@ -1,3 +1,4 @@
+import { getEmbedVideoInfo } from '../features/PromoVideoSection';
 import React from 'react';
 
 // Auxiliar component for detailed car feature breakdown
@@ -119,6 +120,51 @@ const HomePreview = ({ formData }) => {
           </div>
         </div>
       </div>
+
+      {/* Video (Above Countdown) Preview */}
+      {formData.videoEnabled && formData.videoUrl && formData.videoPosition === 'above_countdown' && (
+        <div className="p-3 bg-black/90 border-b border-white/10">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="material-symbols-outlined text-primary text-[10px]">smart_display</span>
+            <span className="text-[8px] font-mono text-primary uppercase font-bold">
+              [ VIDEO PROMO // {formData.videoTitle || 'BUILD REVEAL'} ]
+            </span>
+          </div>
+          <div className="aspect-video w-full rounded-lg bg-black border border-white/20 overflow-hidden shadow-lg">
+            {(() => {
+              const vInfo = getEmbedVideoInfo(formData.videoUrl);
+              if (!vInfo) return <div className="w-full h-full flex items-center justify-center text-gray-500 text-[8px] font-mono">Video URL no válida</div>;
+              if (vInfo.type === 'direct') return <video src={vInfo.videoUrl} controls className="w-full h-full object-cover" />;
+              return <iframe src={vInfo.embedUrl} title="Preview" className="w-full h-full border-0" />;
+            })()}
+          </div>
+        </div>
+      )}
+
+      {/* Simulated Countdown Bar */}
+      <div className="bg-[#0a0a0a] border-b border-white/5 py-2 px-3 text-center">
+        <span className="text-[8px] font-mono text-primary font-bold tracking-widest">[ CONTADOR REGRESIVO // DÍAS : HRS : MIN : SEG ]</span>
+      </div>
+
+      {/* Video (Below Countdown) Preview */}
+      {formData.videoEnabled && formData.videoUrl && formData.videoPosition === 'below_countdown' && (
+        <div className="p-3 bg-black/90 border-b border-white/10">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="material-symbols-outlined text-primary text-[10px]">smart_display</span>
+            <span className="text-[8px] font-mono text-primary uppercase font-bold">
+              [ VIDEO PROMO // {formData.videoTitle || 'BUILD REVEAL'} ]
+            </span>
+          </div>
+          <div className="aspect-video w-full rounded-lg bg-black border border-white/20 overflow-hidden shadow-lg">
+            {(() => {
+              const vInfo = getEmbedVideoInfo(formData.videoUrl);
+              if (!vInfo) return <div className="w-full h-full flex items-center justify-center text-gray-500 text-[8px] font-mono">Video URL no válida</div>;
+              if (vInfo.type === 'direct') return <video src={vInfo.videoUrl} controls className="w-full h-full object-cover" />;
+              return <iframe src={vInfo.embedUrl} title="Preview" className="w-full h-full border-0" />;
+            })()}
+          </div>
+        </div>
+      )}
 
       {/* Ficha Técnica Preview */}
       <div className="p-4 border-b border-white/5">

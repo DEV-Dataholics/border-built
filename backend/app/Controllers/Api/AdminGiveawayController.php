@@ -143,6 +143,16 @@ class AdminGiveawayController extends ResourceController
             'prizeCost'           => 'prize_cost',
             'prize_cost'          => 'prize_cost',
             'breakdownBlocks'     => 'breakdown_blocks',
+            'videoUrl'            => 'video_url',
+            'video_url'           => 'video_url',
+            'videoPosition'       => 'video_position',
+            'video_position'      => 'video_position',
+            'videoTitle'          => 'video_title',
+            'video_title'         => 'video_title',
+            'videoTitleEs'        => 'video_title_es',
+            'video_title_es'      => 'video_title_es',
+            'videoEnabled'        => 'video_enabled',
+            'video_enabled'       => 'video_enabled',
         ];
 
         foreach ($fieldMap as $camel => $snake) {
@@ -326,6 +336,11 @@ class AdminGiveawayController extends ResourceController
         $giveaway['active_multiplier'] = (int) ($giveaway['active_multiplier'] ?? 1);
         $giveaway['is_active'] = (bool) ($giveaway['is_active'] ?? false);
         $giveaway['scarcity_percent_sold'] = (int) ($giveaway['scarcity_percent_sold'] ?? 85);
+        $giveaway['video_enabled'] = (bool) ($giveaway['video_enabled'] ?? false);
+        $giveaway['video_position'] = $giveaway['video_position'] ?? 'below_countdown';
+        $giveaway['video_url'] = $giveaway['video_url'] ?? '';
+        $giveaway['video_title'] = $giveaway['video_title'] ?? '';
+        $giveaway['video_title_es'] = $giveaway['video_title_es'] ?? '';
 
         // Decode breakdown_blocks JSON
         if (!empty($giveaway['breakdown_blocks']) && is_string($giveaway['breakdown_blocks'])) {
