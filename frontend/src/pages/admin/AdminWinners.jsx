@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { db } from '../../lib/db';
 import PageTransition from '../../components/layout/PageTransition';
+import ImageCropperModal from '../../components/admin/ImageCropperModal';
 import { useTranslation } from '../../i18n/useTranslation';
 
 const AdminWinners = () => {
@@ -38,6 +39,16 @@ const AdminWinners = () => {
   const [isUploadingWinner, setIsUploadingWinner] = useState(false);
   const [isDraggingWinner, setIsDraggingWinner] = useState(false);
   const [showWinnerUrlInput, setShowWinnerUrlInput] = useState(false);
+
+  // Image Cropper Modal State
+  const [cropperState, setCropperState] = useState({
+    isOpen: false,
+    imageSrc: null,
+    file: null,
+    targetType: 'winner', // 'winner' | 'community'
+    title: '',
+    defaultAspect: 4 / 3,
+  });
 
   const [winnerForm, setWinnerForm] = useState({
     name: '',
@@ -101,6 +112,102 @@ const AdminWinners = () => {
       isSubscribed = false;
     };
   }, [isAdmin, navigate, loadData]);
+
+  // --- Image Cropper Handlers ---
+  const handleWinnerFileSelect = (file) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      alert("Por favor selecciona un archivo de imagen válido (JPG, PNG, WEBP).");
+      return;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+      alert("El archivo supera los 15MB máximos permitidos.");
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    setCropperState({
+      isOpen: true,
+      imageSrc: objectUrl,
+      file,
+      targetType: 'winner',
+      title: 'Ajustar y Recortar Foto del Auto',
+      defaultAspect: 4 / 3,
+    });
+  };
+
+  const handleCommunityFileSelect = (file) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      alert("Por favor selecciona un archivo de imagen válido (JPG, PNG, WEBP).");
+      return;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+      alert("El archivo supera los 15MB máximos permitidos.");
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    setCropperState({
+      isOpen: true,
+      imageSrc: objectUrl,
+      file,
+      targetType: 'community',
+      title: 'Ajustar y Recortar Foto de Comunidad',
+      defaultAspect: 1,
+    });
+  };
+
+  const handleRecropCurrent = (targetType) => {
+    const currentUrl = targetType === 'winner' ? winnerForm.carImage : communityForm.image;
+    if (!currentUrl) return;
+
+    setCropperState({
+      isOpen: true,
+      imageSrc: currentUrl,
+      file: { name: `${targetType}-recropped.jpg` },
+      targetType,
+      title: targetType === 'winner' ? 'Recortar Foto del Auto Actual' : 'Recortar Foto de Comunidad Actual',
+      defaultAspect: targetType === 'winner' ? 4 / 3 : 1,
+    });
+  };
+
+  const handleCroppedUpload = async (croppedBlob, croppedFile) => {
+    const { targetType, imageSrc } = cropperState;
+    if (imageSrc && imageSrc.startsWith('blob:')) {
+      URL.revokeObjectURL(imageSrc);
+    }
+    setCropperState(prev => ({ ...prev, isOpen: false, imageSrc: null }));
+
+    if (targetType === 'winner') {
+      await handleWinnerImageUpload(croppedFile);
+    } else {
+      await handleCommunityImageUpload(croppedFile);
+    }
+  };
+
+  const handleUploadOriginal = async () => {
+    const { file, targetType, imageSrc } = cropperState;
+    if (imageSrc && imageSrc.startsWith('blob:')) {
+      URL.revokeObjectURL(imageSrc);
+    }
+    setCropperState(prev => ({ ...prev, isOpen: false, imageSrc: null }));
+
+    if (file instanceof File) {
+      if (targetType === 'winner') {
+        await handleWinnerImageUpload(file);
+      } else {
+        await handleCommunityImageUpload(file);
+      }
+    }
+  };
+
+  const handleCloseCropper = () => {
+    if (cropperState.imageSrc && cropperState.imageSrc.startsWith('blob:')) {
+      URL.revokeObjectURL(cropperState.imageSrc);
+    }
+    setCropperState(prev => ({ ...prev, isOpen: false, imageSrc: null, file: null }));
+  };
 
   // --- Image Upload Handlers ---
   const handleCommunityImageUpload = async (file) => {
@@ -586,7 +693,8 @@ const AdminWinners = () => {
                   accept="image/*"
                   onChange={(e) => {
                     if (e.target.files?.[0]) {
-                      handleCommunityImageUpload(e.target.files[0]);
+                      handleCommunityFileSelect(e.target.files[0]);
+                      e.target.value = '';
                     }
                   }}
                 />
@@ -599,7 +707,7 @@ const AdminWinners = () => {
                     e.preventDefault();
                     setIsDraggingCommunity(false);
                     if (e.dataTransfer.files?.[0]) {
-                      handleCommunityImageUpload(e.dataTransfer.files[0]);
+                      handleCommunityFileSelect(e.dataTransfer.files[0]);
                     }
                   }}
                   className={`relative border-2 border-dashed rounded-xl p-3 flex flex-col items-center justify-center transition-all cursor-pointer overflow-hidden ${
@@ -623,11 +731,29 @@ const AdminWinners = () => {
                         className="w-full h-full object-cover rounded-lg"
                         onError={(e) => { e.target.style.display = "none"; }}
                       />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-1.5 transition-opacity">
-                        <span className="material-symbols-outlined text-white text-3xl">cloud_upload</span>
-                        <span className="text-xs font-mono font-bold text-white uppercase tracking-wider bg-black/80 px-3 py-1 rounded-full border border-white/20">
-                          Cambiar Foto
-                        </span>
+                      <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity p-2">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRecropCurrent('community');
+                          }}
+                          className="text-xs font-mono font-bold text-black uppercase tracking-wider bg-primary hover:bg-primary/90 px-3 py-1.5 rounded-lg border border-primary flex items-center gap-1 shadow-lg cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-sm">crop</span>
+                          Recortar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            document.getElementById("community-image-input").click();
+                          }}
+                          className="text-xs font-mono font-bold text-white uppercase tracking-wider bg-black/80 hover:bg-black px-3 py-1.5 rounded-lg border border-white/20 flex items-center gap-1 shadow-lg cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-sm">cloud_upload</span>
+                          Cambiar
+                        </button>
                       </div>
                     </div>
                   ) : (
@@ -808,7 +934,8 @@ const AdminWinners = () => {
                   accept="image/*"
                   onChange={(e) => {
                     if (e.target.files?.[0]) {
-                      handleWinnerImageUpload(e.target.files[0]);
+                      handleWinnerFileSelect(e.target.files[0]);
+                      e.target.value = '';
                     }
                   }}
                 />
@@ -821,7 +948,7 @@ const AdminWinners = () => {
                     e.preventDefault();
                     setIsDraggingWinner(false);
                     if (e.dataTransfer.files?.[0]) {
-                      handleWinnerImageUpload(e.dataTransfer.files[0]);
+                      handleWinnerFileSelect(e.dataTransfer.files[0]);
                     }
                   }}
                   className={`relative border-2 border-dashed rounded-xl p-3 flex flex-col items-center justify-center transition-all cursor-pointer overflow-hidden ${
@@ -845,11 +972,29 @@ const AdminWinners = () => {
                         className="w-full h-full object-cover rounded-lg"
                         onError={(e) => { e.target.style.display = "none"; }}
                       />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-1.5 transition-opacity">
-                        <span className="material-symbols-outlined text-white text-3xl">cloud_upload</span>
-                        <span className="text-xs font-mono font-bold text-white uppercase tracking-wider bg-black/80 px-3 py-1 rounded-full border border-white/20">
-                          Cambiar Foto
-                        </span>
+                      <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity p-2">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRecropCurrent('winner');
+                          }}
+                          className="text-xs font-mono font-bold text-black uppercase tracking-wider bg-primary hover:bg-primary/90 px-3 py-1.5 rounded-lg border border-primary flex items-center gap-1 shadow-lg cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-sm">crop</span>
+                          Recortar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            document.getElementById("winner-image-input").click();
+                          }}
+                          className="text-xs font-mono font-bold text-white uppercase tracking-wider bg-black/80 hover:bg-black px-3 py-1.5 rounded-lg border border-white/20 flex items-center gap-1 shadow-lg cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-sm">cloud_upload</span>
+                          Cambiar
+                        </button>
                       </div>
                     </div>
                   ) : (
@@ -918,6 +1063,17 @@ const AdminWinners = () => {
           </div>
         </div>
       )}
+      {/* Image Cropper Modal */}
+      <ImageCropperModal
+        isOpen={cropperState.isOpen}
+        imageSrc={cropperState.imageSrc}
+        fileName={cropperState.file?.name || 'recorte.jpg'}
+        title={cropperState.title}
+        defaultAspect={cropperState.defaultAspect}
+        onCropConfirm={handleCroppedUpload}
+        onUploadOriginal={handleUploadOriginal}
+        onClose={handleCloseCropper}
+      />
     </PageTransition>
   );
 };
