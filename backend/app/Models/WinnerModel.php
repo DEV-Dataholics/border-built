@@ -30,6 +30,7 @@ class WinnerModel extends Model
             'car_es',
         'location_es',
         'badge_es',
+        'instagram',
     ];
 
     // Dates

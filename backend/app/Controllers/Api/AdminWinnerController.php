@@ -29,6 +29,7 @@ class AdminWinnerController extends ResourceController
                 'car'          => $w['car'],
                 'carImage'     => $w['car_image'],
                 'badgeText'    => $w['badge_text'],
+                'instagram'    => $w['instagram'] ?? null,
                 'totalEntries' => (int) $w['total_entries'],
                 'wonAt'        => $w['won_at'],
                 'createdAt'    => $w['created_at'],
@@ -64,6 +65,7 @@ class AdminWinnerController extends ResourceController
             'car_image'     => $data['carImage'] ?? ($data['car_image'] ?? ''),
             'badge_text'    => $data['badgeText'] ?? ($data['badge_text'] ?? 'Grand Prize Winner'),
             'badge_es'      => $data['badgeEs'] ?? null,
+            'instagram'     => $data['instagram'] ?? null,
             'total_entries' => (int) ($data['totalEntries'] ?? ($data['total_entries'] ?? 5000)),
             'won_at'        => date('Y-m-d H:i:s'),
         ];
@@ -82,6 +84,7 @@ class AdminWinnerController extends ResourceController
             'car'          => $created['car'],
             'carImage'     => $created['car_image'],
             'badgeText'    => $created['badge_text'],
+            'instagram'    => $created['instagram'] ?? null,
             'totalEntries' => (int) $created['total_entries'],
             'wonAt'        => $created['won_at'],
             'createdAt'    => $created['created_at'],
@@ -114,6 +117,7 @@ class AdminWinnerController extends ResourceController
         if (isset($data['carImage'])) $updateData['car_image'] = $data['carImage'];
         if (isset($data['badgeText'])) $updateData['badge_text'] = $data['badgeText'];
         if (isset($data['badgeEs'])) $updateData['badge_es'] = $data['badgeEs'];
+        if (isset($data['instagram'])) $updateData['instagram'] = $data['instagram'];
         if (isset($data['totalEntries'])) $updateData['total_entries'] = (int) $data['totalEntries'];
 
 
@@ -135,6 +139,7 @@ class AdminWinnerController extends ResourceController
             'car'          => $updated['car'],
             'carImage'     => $updated['car_image'],
             'badgeText'    => $updated['badge_text'],
+            'instagram'    => $updated['instagram'] ?? null,
             'totalEntries' => (int) $updated['total_entries'],
             'wonAt'        => $updated['won_at'],
             'createdAt'    => $updated['created_at'],

@@ -4,6 +4,28 @@ import { db } from '../lib/db';
 import { useTranslation } from '../i18n/useTranslation';
 import PageTransition from '../components/layout/PageTransition';
 
+const getInstagramInfo = (raw) => {
+  if (!raw || typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    try {
+      const parsed = new URL(trimmed);
+      const parts = parsed.pathname.replace(/^\/|\/$/g, '').split('/');
+      const handle = parts[0] ? `@${parts[0]}` : '@instagram';
+      return { handle, url: trimmed };
+    } catch {
+      return { handle: trimmed, url: trimmed };
+    }
+  }
+  const cleanHandle = trimmed.replace(/^@+/, '');
+  return {
+    handle: `@${cleanHandle}`,
+    url: `https://instagram.com/${cleanHandle}`
+  };
+};
+
 const Winners = () => {
   const { t, lang } = useTranslation();
   const [winners, setWinners] = useState([]);
@@ -117,7 +139,28 @@ const Winners = () => {
                               : winner.badgeText}
                           </div>
                           <h4 className="text-lg font-black italic text-white uppercase tracking-wider">{lang === 'es' && winner.car_es ? winner.car_es : winner.car}</h4>
-                          <p className="text-gray-300 text-xs font-mono">{winner.name}</p>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-gray-300 text-xs font-mono">{winner.name}</p>
+                            {winner.instagram && (() => {
+                              const ig = getInstagramInfo(winner.instagram);
+                              if (!ig) return null;
+                              return (
+                                <a
+                                  href={ig.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-black/60 hover:bg-black/90 border border-white/20 hover:border-primary text-gray-300 hover:text-primary transition-all duration-300 group/ig cursor-pointer"
+                                  title={`Instagram: ${ig.handle}`}
+                                >
+                                  <svg className="w-3 h-3 fill-currentColor text-primary shrink-0 transition-transform group-hover/ig:scale-110" viewBox="0 0 24 24">
+                                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                                  </svg>
+                                  <span className="text-[10px] font-mono font-bold tracking-tight text-white group-hover/ig:text-primary">{ig.handle}</span>
+                                </a>
+                              );
+                            })()}
+                          </div>
                         </div>
                         <div className="text-right">
                           <span className="block text-2xl">{winner.flag}</span>

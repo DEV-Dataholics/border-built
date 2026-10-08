@@ -46,6 +46,7 @@ const AdminWinners = () => {
     flag: '🇺🇸',
     carImage: '',
     badgeText: 'Grand Prize Winner',
+    instagram: '',
     totalEntries: 5000,
   });
 
@@ -267,6 +268,7 @@ const AdminWinners = () => {
         flag: item.flag || '🇺🇸',
         carImage: item.carImage || '',
         badgeText: item.badgeText || 'Tuner Destacado',
+        instagram: item.instagram || '',
         totalEntries: item.totalEntries || 5000,
       });
     } else {
@@ -278,6 +280,7 @@ const AdminWinners = () => {
         flag: '🇺🇸',
         carImage: '',
         badgeText: 'Tuner Destacado',
+        instagram: '',
         totalEntries: 5000,
       });
     }
@@ -490,7 +493,13 @@ const AdminWinners = () => {
                   <div className="absolute bottom-3 left-3 right-3 pointer-events-none">
                     <h3 className="text-white text-base font-black italic uppercase">{winner.car}</h3>
                     <p className="text-gray-300 text-xs font-mono">{winner.name}</p>
-                    <p className="text-primary text-[10px] font-mono mt-0.5">
+                    {winner.instagram && (
+                      <p className="text-primary text-[10px] font-mono mt-0.5 flex items-center gap-1 font-bold">
+                        <span>📷</span>
+                        <span>{winner.instagram.startsWith('http') ? (winner.instagram.split('/').filter(Boolean).pop() || winner.instagram) : (winner.instagram.startsWith('@') ? winner.instagram : `@${winner.instagram}`)}</span>
+                      </p>
+                    )}
+                    <p className="text-gray-400 text-[10px] font-mono mt-0.5">
                       {winner.flag} {winner.location}
                     </p>
                   </div>
@@ -770,6 +779,23 @@ const AdminWinners = () => {
                   onChange={(e) => setWinnerForm({ ...winnerForm, badgeText: e.target.value })}
                   className="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-primary outline-none"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs font-mono text-gray-400 mb-1">Instagram (@usuario o enlace)</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2.5 text-gray-500 font-mono text-xs">@</span>
+                  <input
+                    type="text"
+                    placeholder="usuario o https://instagram.com/usuario"
+                    value={winnerForm.instagram}
+                    onChange={(e) => setWinnerForm({ ...winnerForm, instagram: e.target.value })}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg pl-8 pr-3 py-2.5 text-sm text-white focus:border-primary outline-none font-mono"
+                  />
+                </div>
+                <p className="text-[10px] font-mono text-gray-500 mt-1">
+                  Enlaza directamente al Instagram del ganador desde la tarjeta de la tienda.
+                </p>
               </div>
 
               <div>

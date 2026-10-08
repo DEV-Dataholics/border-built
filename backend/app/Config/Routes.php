@@ -95,6 +95,21 @@ $routes->group('api', ['namespace' => 'App\\Controllers\\Api'], static function 
         ]);
     });
 
+        $routes->get('setup_winners_instagram', function() {
+        $db = \Config\Database::connect();
+        $fields = $db->getFieldNames('winners');
+        $added = false;
+        if (!in_array('instagram', $fields)) {
+            $db->query("ALTER TABLE winners ADD COLUMN instagram VARCHAR(255) NULL AFTER badge_es");
+            $added = true;
+        }
+        return json_encode([
+            'status' => 'success',
+            'added' => $added,
+            'fields' => $db->getFieldNames('winners')
+        ]);
+    });
+
     $routes->get('alter-db', 'ProductController::alterDb');
     $routes->get('products', 'ProductController::index');
     $routes->get('products/(:segment)', 'ProductController::show/$1');
